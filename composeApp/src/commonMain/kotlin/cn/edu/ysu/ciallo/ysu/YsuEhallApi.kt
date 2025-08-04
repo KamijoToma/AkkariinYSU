@@ -15,11 +15,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 /**
- * 封装与燕山大学网上服务大厅 (E-Hall) 交互的API客户端。
- * @param cookieManager 用于管理和共享Cookie。
- */
-
-/**
  * 定义登录操作可能的结果。
  */
 sealed class LoginResult {
@@ -33,6 +28,10 @@ sealed class LoginResult {
     object CaptchaRequired : LoginResult()
 }
 
+/**
+ * 封装与燕山大学网上服务大厅 (E-Hall) 交互的API客户端。
+ * @param cookieManager 用于管理和共享Cookie。
+ */
 class YsuEhallApi(private val cookieManager: NetworkCookieManager) {
 
     @Serializable

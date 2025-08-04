@@ -47,8 +47,8 @@ fun PreviewLibraryCard() {
         electricityInfo = "电费：剩余 23.5 元",
         bookInfo = "借书：还剩 2 本未归还",
         libraryStatus = listOf(
-            cn.edu.ysu.ciallo.home.LibraryStatus("东校区", 120, 80),
-            cn.edu.ysu.ciallo.home.LibraryStatus("西校区", 90, 60)
+            LibraryStatus("东校区", 120, 80),
+            LibraryStatus("西校区", 90, 60)
         )
     )
 }

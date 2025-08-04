@@ -1,7 +1,5 @@
 package cn.edu.ysu.ciallo.cardbalance
 
-import cn.edu.ysu.ciallo.cardbalance.CardBalanceResult
-
 interface CardBalanceRepository {
     suspend fun getCardBalance(): CardBalanceResult
 }
