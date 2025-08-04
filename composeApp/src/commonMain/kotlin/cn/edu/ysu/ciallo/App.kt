@@ -4,11 +4,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.CardMembership
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Details
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,7 +26,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cn.edu.ysu.ciallo.cardbalance.CardBalanceResult
+import cn.edu.ysu.ciallo.cardbalance.CardBalanceViewModel
+import cn.edu.ysu.ciallo.cardbalance.MockCardBalanceRepository
+import cn.edu.ysu.ciallo.home.rememberHomeViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun MainScreen() {
@@ -51,78 +63,147 @@ fun MainScreen() {
 
 @Composable
 fun HomePage(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color(0xFFF7F8FA))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // 顶部标题
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Text("晚上好 祝你好梦", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+    val viewModel = rememberHomeViewModel()
+    val data = viewModel.homeData.value
+    // 卡余额ViewModel，实际可根据需要切换为RemoteCardBalanceRepository
+    val cardBalanceViewModel = remember { CardBalanceViewModel(MockCardBalanceRepository()) }
+    val cardBalanceState = cardBalanceViewModel.uiState.value
+    // 首次进入自动加载卡余额
+    LaunchedEffect(Unit) { cardBalanceViewModel.loadCardBalance() }
+    if (data == null) {
+        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
-        // 研究生功能激活提示
-        Card(shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
-            Text("本科生功能已经激活", modifier = Modifier.padding(16.dp))
-        }
-        // 日程区块
-        Card(shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("当前 暂无日程", fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(4.dp))
-                Text("明天 暂无日程")
-                Spacer(Modifier.height(4.dp))
-                Text("更多")
-            }
-        }
-        // 电费账单、借书、图书馆状态等区块
-        Card(shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("需要填写电费账号\n目前无法查询")
-                Spacer(Modifier.height(8.dp))
-                Text("借书 0 本\n目前没有待归还图书")
-                Spacer(Modifier.height(8.dp))
-                Text("图书馆当前状况")
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Column { Text("南校区\n在馆 161 人\n空位 4423 个") }
-                    Column { Text("北校区\n在馆 78 人\n空位 1021 个") }
+        return
+    }
+    Box(modifier = modifier.fillMaxSize()) {
+        androidx.compose.foundation.rememberScrollState().let { scrollState ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // 顶部标题
+                Text(
+                    data.greeting,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                // 学生类型提示
+                AssistChip(
+                    onClick = {},
+                    label = { Text(data.studentType) },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                // 日程区块
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(Modifier.padding(20.dp)) {
+                        Text("日程", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Spacer(Modifier.height(8.dp))
+                        Text("今天：${data.scheduleToday}")
+                        Text("明天：${data.scheduleTomorrow}")
+                        TextButton(onClick = { /* TODO: 跳转日程 */ }) { Text("更多") }
+                    }
                 }
-            }
-        }
-        // 卡里余额
-        Card(shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
-            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Home, contentDescription = null)
-                Spacer(Modifier.size(8.dp))
-                Text("卡里 0.00 元 查询\n卡通流水")
-            }
-        }
-        // 校园流量信息失败
-        Card(shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
-            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Home, contentDescription = null)
-                Spacer(Modifier.size(8.dp))
-                Text("获取校园网流量信息失败\n您还未输入账号密码？")
-            }
-        }
-        // 功能区按钮
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.Home, contentDescription = null)
-                Text("成绩查询", fontSize = 12.sp)
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.Home, contentDescription = null)
-                Text("考试安排", fontSize = 12.sp)
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.Home, contentDescription = null)
-                Text("空闲教室", fontSize = 12.sp)
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.Home, contentDescription = null)
-                Text("其他功能", fontSize = 12.sp)
+                // 电费、借书、图书馆
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(data.electricityInfo, fontSize = 14.sp)
+                        Text(data.bookInfo, fontSize = 14.sp)
+                        Text("图书馆当前状况", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            data.libraryStatus.forEach {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(it.campus, fontWeight = FontWeight.Bold)
+                                    Text("在馆 ${it.people} 人", fontSize = 12.sp)
+                                    Text("空位 ${it.seats} 个", fontSize = 12.sp)
+                                }
+                            }
+                        }
+                    }
+                }
+                // 卡余额
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.CreditCard, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text("卡余额", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            when (cardBalanceState) {
+                                null -> Text("加载中...", fontSize = 14.sp)
+                                is CardBalanceResult.Success -> Text(
+                                    "￥${String.format("%.2f", cardBalanceState.data.balance)} (更新于${
+                                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                                            .format(java.time.Instant.ofEpochMilli(cardBalanceState.data.lastUpdate)
+                                                .atZone(java.time.ZoneId.systemDefault())
+                                                .toLocalDateTime())
+                                    })",
+                                    fontSize = 14.sp
+                                )
+                                is CardBalanceResult.Failure -> Text(
+                                    when (cardBalanceState.error) {
+                                        cn.edu.ysu.ciallo.cardbalance.CardBalanceError.NotLoggedIn -> "未登录"
+                                        cn.edu.ysu.ciallo.cardbalance.CardBalanceError.NetworkError -> "网络错误"
+                                        else -> "获取失败"
+                                    },
+                                    color = Color.Red,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
+                        Spacer(Modifier.weight(1f))
+                        IconButton(onClick = { cardBalanceViewModel.loadCardBalance() }) {
+                            Icon(Icons.Default.Refresh, contentDescription = "刷新", tint = MaterialTheme.colorScheme.primary)
+                        }
+                        IconButton(onClick = { /* TODO: 跳转到卡详情 */ }) {
+                            Icon(Icons.Default.Details, contentDescription = "卡详情", tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+                // 校园网流量
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Wifi, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(12.dp))
+                        Text(data.networkInfo, fontSize = 14.sp)
+                    }
+                }
+                // 功能区按钮
+                Row(
+                    Modifier.fillMaxWidth().padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    val features = listOf(
+                        "成绩查询", "考试安排", "空闲教室", "其他功能"
+                    )
+                    features.forEach {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Home, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Text(it, fontSize = 12.sp)
+                        }
+                    }
+                }
             }
         }
     }
