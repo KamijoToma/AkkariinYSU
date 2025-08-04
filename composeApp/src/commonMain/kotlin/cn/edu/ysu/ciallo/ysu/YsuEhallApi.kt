@@ -68,6 +68,7 @@ data class CardData(
  */
 class YsuEhallApi {
     private val _loginState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
+    private val cookieStorage = CustomCookieStorage()
     val loginState = _loginState.asStateFlow()
 
     companion object {
@@ -82,11 +83,11 @@ class YsuEhallApi {
             json()
         }
         install(HttpCookies) {
-            storage = CustomCookieStorage()
+            storage = cookieStorage
         }
         install(Logging) {
             logger = Logger.SIMPLE
-            level = LogLevel.HEADERS
+            level = LogLevel.ALL
         }
         followRedirects = true
         install(HttpRedirect) {
@@ -174,6 +175,8 @@ class YsuEhallApi {
 
             if (response.status == HttpStatusCode.Found) {
                 println("确认登录成功。")
+                // save cookies to storage
+                cookieStorage.saveToDisk()
                 _loginState.value = LoginUiState.Success
                 client.get(response.headers[HttpHeaders.Location]!!)
                 return LoginResult.Success
@@ -191,12 +194,96 @@ class YsuEhallApi {
         }
     }
 
-    suspend fun getLoginUser(): String? {
+    @kotlinx.serialization.Serializable
+    data class LoginUserResponse(
+        val errcode: String,
+        val errmsg: String,
+        val data: LoginUserData? = null
+    )
+
+    @kotlinx.serialization.Serializable
+    data class LoginUserData(
+        val userSwitchLang: Boolean? = null,
+        val wid: String? = null,
+        val personWid: String? = null,
+        val categoryWid: String? = null,
+        val categoryName: String? = null,
+        val userAccount: String? = null,
+        val userName: String? = null,
+        val userAlias: String? = null,
+        val enterSchoolDate: String? = null,
+        val certTypeWid: String? = null,
+        val certCode: String? = null,
+        val phone: String? = null,
+        val email: String? = null,
+        val userStatus: String? = null,
+        val lifeCycle: String? = null,
+        val lifeCycleExpire: String? = null,
+        val deptWid: String? = null,
+        val deptName: String? = null,
+        val sexCode: String? = null,
+        val birthday: String? = null,
+        val isPrimary: String? = null,
+        val userIcon: String? = null,
+        val preferredLanguage: String? = null,
+        val userTag: String? = null,
+        val orgs: List<LoginUserOrg>? = null,
+        val groups: List<LoginUserGroup>? = null,
+        val supportLanguages: List<LoginUserLang>? = null,
+        val portalSelectMenus: String? = null,
+        val allParentOrgIncludeSelf: List<String>? = null,
+        val idsUserType: String? = null,
+        val headImageIcon: String? = null,
+        val defaultUserAvatar: String? = null,
+        val bindUserList: String? = null,
+        val switchAccountPage: String? = null,
+        val portalDefaultLang: String? = null,
+        val isUserSwitchLang: Boolean? = null,
+        val onlineUserCount: Int? = null,
+        val interKey: String? = null,
+        val stataAddress: String? = null,
+        val portalDomain: String? = null
+    )
+
+    @kotlinx.serialization.Serializable
+    data class LoginUserOrg(
+        val pwid: String? = null,
+        val wid: String? = null,
+        val code: String? = null,
+        val name: String? = null,
+        val pWid: String? = null,
+        val categoryWid: String? = null,
+        val orderIndex: Int? = null,
+        val type: String? = null,
+        val shortName: String? = null,
+        val isVisible: String? = null
+    )
+
+    @kotlinx.serialization.Serializable
+    data class LoginUserGroup(
+        val wid: String? = null,
+        val name: String? = null,
+        val groupId: String? = null,
+        val groupType: String? = null,
+        val domainWid: String? = null,
+        val orderIndex: Int? = null
+    )
+
+    @kotlinx.serialization.Serializable
+    data class LoginUserLang(
+        val langName: String? = null,
+        val langCname: String? = null,
+        val langCode: String? = null,
+        val default: Boolean? = null
+    )
+
+    suspend fun getLoginUser(): LoginUserResponse? {
         return try {
             val response = client.get("$BASE_URL/getLoginUser")
             if (response.status.isSuccess()) {
-                response.bodyAsText()
+                response.body<LoginUserResponse>()
             } else {
+                println("获取用户信息失败: ${response.status}")
                 null
             }
         } catch (e: Exception) {

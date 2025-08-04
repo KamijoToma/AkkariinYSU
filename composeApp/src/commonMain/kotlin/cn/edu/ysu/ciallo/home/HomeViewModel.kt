@@ -13,7 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val repository: HomeRepository) {
-    var homeData: MutableState<HomeData?> = mutableStateOf(null)
+    var homeData: MutableState<HomeData> = mutableStateOf(DEFAULT_HOME_DATA)
         private set
 
     fun loadData() {
@@ -23,12 +23,4 @@ class HomeViewModel(private val repository: HomeRepository) {
     }
 }
 
-@Composable
-fun rememberHomeViewModel(repository: HomeRepository = FakeHomeRepository()): HomeViewModel {
-    val viewModel = remember { HomeViewModel(repository) }
-    LaunchedEffect(Unit) {
-        viewModel.loadData()
-    }
-    return viewModel
-}
 

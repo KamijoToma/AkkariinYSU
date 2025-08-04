@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -31,9 +32,19 @@ fun HomePage(
     useRemoteApi: Boolean = true,
     onNavigateToLogin: () -> Unit
 ) {
-    var isLoggedIn by remember { mutableStateOf(false) }
-    val viewModel = rememberHomeViewModel()
-    val data = viewModel.homeData.value
+    val homeViewModel: HomeViewModel = remember(useRemoteApi) {
+        if (useRemoteApi) {
+            HomeViewModel(RemoteHomeRepository())
+        } else {
+            HomeViewModel(FakeHomeRepository())
+        }
+    }
+
+    // refresh home data
+    homeViewModel.loadData()
+    val homeData = homeViewModel.homeData.value
+
+
     val cardBalanceViewModel = remember(useRemoteApi) {
         val repository = if (useRemoteApi) {
             RemoteCardBalanceRepository()
@@ -42,13 +53,8 @@ fun HomePage(
         }
         CardBalanceViewModel(repository)
     }
-    val cardBalanceState = cardBalanceViewModel.uiState.value
-    if (data == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+
+
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -58,13 +64,13 @@ fun HomePage(
         ) {
 
             Text(
-                data.greeting,
+                "晚上好，${homeData.userName}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-            if (!isLoggedIn) {
+            if (!homeData.logged) {
                 AssistChip(
                     onClick = onNavigateToLogin,
                     label = { Text("登录") },
@@ -73,27 +79,30 @@ fun HomePage(
             } else {
                 AssistChip(
                     onClick = {},
-                    label = { Text(data.studentType) },
+                    label = { Text("已登录：${homeData.studentType}") },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
             ScheduleCard(
-                today = data.scheduleToday,
-                tomorrow = data.scheduleTomorrow,
+                today = "data.scheduleToday",
+                tomorrow = "data.scheduleTomorrow",
                 onMore = { /* TODO: 跳转日程 */ }
             )
             LibraryCard(
-                electricityInfo = data.electricityInfo,
-                bookInfo = data.bookInfo,
-                libraryStatus = data.libraryStatus
+                electricityInfo = "data.electricityInfo",
+                bookInfo = "data.bookInfo",
+                libraryStatus = emptyList(),
             )
             CardBalanceCard(
-                cardBalanceState = cardBalanceState,
+                cardBalanceState = cardBalanceViewModel.uiState.value,
                 onRefresh = { cardBalanceViewModel.loadCardBalance() },
                 onDetails = { /* TODO: 跳转到卡详情 */ },
             )
+            LaunchedEffect(homeData){
+                cardBalanceViewModel.loadCardBalance()
+            }
             NetworkCard(
-                networkInfo = data.networkInfo
+                networkInfo = "data.networkInfo"
             )
             Row(
                 Modifier.fillMaxWidth().padding(top = 8.dp),

@@ -17,7 +17,9 @@ import cn.edu.ysu.ciallo.home.LoginPage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    useRemoteApi: Boolean = true,
+) {
     var selectedTab by remember { mutableStateOf(0) }
     var showLoginPage by remember { mutableStateOf(false) }
 
@@ -45,7 +47,8 @@ fun MainScreen() {
             when (selectedTab) {
                 0 -> HomePage(
                     Modifier.padding(innerPadding),
-                    onNavigateToLogin = { showLoginPage = true }
+                    onNavigateToLogin = { showLoginPage = true },
+                    useRemoteApi = useRemoteApi
                 )
                 1 -> ClubRecommendPage(Modifier.padding(innerPadding))
             }
@@ -54,7 +57,12 @@ fun MainScreen() {
 }
 
 @Composable
-@Preview
 fun App() {
     MainScreen()
+}
+
+@Composable
+@Preview
+fun PreviewApp() {
+    MainScreen(useRemoteApi = false)
 }
