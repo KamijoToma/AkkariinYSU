@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter
 fun CardBalanceCard(
     cardBalanceState: CardBalanceResult?,
     onRefresh: () -> Unit,
-    onDetails: () -> Unit
+    onDetails: () -> Unit,
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -51,7 +51,7 @@ fun CardBalanceCard(
                         when (val error = cardBalanceState.error) {
                             is CardBalanceError.LoginFailed -> "登录失败: ${error.reason}"
                             CardBalanceError.CaptchaRequired -> "需要验证码"
-                            CardBalanceError.NotLoggedIn -> "未提供凭据"
+                            CardBalanceError.NotLoggedIn -> "未登录"
                             CardBalanceError.NetworkError -> "网络错误"
                             CardBalanceError.UnknownError -> "未知错误"
                             is CardBalanceError.Custom -> error.message

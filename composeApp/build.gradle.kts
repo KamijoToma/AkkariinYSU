@@ -64,6 +64,9 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ksoup)
             implementation(libs.krypto)
+            implementation(libs.slf4j.api)
+            implementation(libs.slf4j.simple)
+            implementation(libs.ktor.client.logging)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -72,7 +75,7 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
-            implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.client.okhttp)
         }
     }
 }

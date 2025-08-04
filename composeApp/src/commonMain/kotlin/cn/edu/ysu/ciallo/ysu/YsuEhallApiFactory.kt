@@ -16,7 +16,7 @@ object YsuEhallApiFactory {
 
     // YsuEhallApi 的懒加载单例实例
     private val apiInstance: YsuEhallApi by lazy {
-        YsuEhallApi(cookieManager)
+        YsuEhallApi()
     }
 
     /**

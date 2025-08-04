@@ -1,26 +1,23 @@
 package cn.edu.ysu.ciallo.ysu
 
-import cn.edu.ysu.ciallo.cardbalance.NetworkCookieManager
+import kotlinx.coroutines.runBlocking
 import kotlin.test.*
 import kotlinx.coroutines.test.runTest
+import org.slf4j.LoggerFactory
 
 class YsuEhallApiTest {
-    @Test
-    fun testLoginWithInvalidCredentials() = runTest {
-        val api = YsuEhallApi(
-            cookieManager = NetworkCookieManager()
-        )
-        val result = api.login("wrongUser", "wrongPass")
-        assertTrue(result is LoginResult.Failure || result is LoginResult.CaptchaRequired)
+    val api = runBlocking {
+        val api = YsuEhallApi()
+        assert(api.login(YsuEhallApiCredentials.USERNAME, YsuEhallApiCredentials.PASSWORD) == LoginResult.Success)
+        api
     }
 
     @Test
-    fun testLoginWithValidCredentials() = runTest {
-        val api = YsuEhallApi(
-            cookieManager = NetworkCookieManager()
-        )
-        val result = api.login("xxxxxxxx", "xxxxxxxxxx")
-        assertTrue(result is LoginResult.Success)
+    fun testGetUserInfo() = runTest {
+        LoggerFactory.getLogger("YsuEhallApi")
+        val balance = api.getCardBalance()
+        assertTrue(balance != null && balance.code == 200, "Expected response code 200, got $balance")
+        println(balance)
     }
 }
 

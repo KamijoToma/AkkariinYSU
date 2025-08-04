@@ -58,6 +58,7 @@
   - `HomeViewModel.kt`：首页ViewModel
   - `HomePage.kt`：主页页面组件（已独立文件，含Compose预览）
   - `ClubRecommendPage.kt`：社团推荐页面组件（已独立文件，含Compose预览）
+  - `LoginPage.kt`：登录页面组件
 - `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/cardbalance/`
   - `CardBalanceData.kt`：卡余额数据模型、错误类型、结果封装
   - `CardBalanceRepository.kt`：仓库接口，含Mock与Remote实现
@@ -131,6 +132,44 @@
 -   **松耦合**: UI层 (Compose) -> ViewModel -> Repository -> API层。每一层都只与相邻的层交互，API逻辑的变更不会影响到UI。
 -   **可扩展性**: 未来需要增加新的API（如获取课表、成绩），只需在 `YsuEhallApi` 中增加新的方法，并创建对应的 `RemoteRepository` 实现即可，对现有代码影响极小。
 -   **可测试性**: 依赖注入的设计使得我们可以轻松地为 `ViewModel` 提供 `MockRepository` 进行单元测试，也可以独立测试 `RemoteRepository` 和 `YsuEhallApi`。
+
+## 登录功能
+
+### 登录页面
+- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/home/LoginPage.kt`
+- **功能**:
+  - 提供用户名和密码输入框。
+  - 提供登录按钮，调用 `YsuEhallApi` 的 `login` 方法。
+  - 显示登录状态（成功或失败）。
+
+### HomePage更新
+- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/home/HomePage.kt`
+- **功能**:
+  - 添加一个 `AssistChip` 按钮，点击后导航到 `LoginPage`。
+  - 如果未登录，显示提示信息。
+
+### ViewModel更新
+- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/home/HomeViewModel.kt`
+- **功能**:
+  - 添加登录状态管理。
+  - 提供登录方法，调用 `YsuEhallApi` 的 `login` 方法并更新状态。
+
+### YsuEhallApi更新
+- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/ysu/YsuEhallApi.kt`
+- **功能**:
+  - 确保 `login` 方法支持多次调用。
+  - 提供登录状态检查方法。
+
+### CardBalanceCard组件更新
+- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/components/CardBalanceCard.kt`
+- **功能**:
+  - 如果未登录，显示提示信息并提供跳转到 `LoginPage` 的按钮。
+
+### 示例流程
+- 用户在 `HomePage` 点击登录按钮，跳转到 `LoginPage`。
+- 用户输入用户名和密码，点击登录。
+- 登录成功后，返回 `HomePage`，并刷新各组件数据。
+- 如果登录失败，显示错误信息并允许重试。
 
 ---
 如需补充具体页面、功能、资源等细节，请在本文件继续记录。
