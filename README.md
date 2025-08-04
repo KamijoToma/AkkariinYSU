@@ -1,20 +1,23 @@
-This is a Kotlin Multiplatform project targeting Android, Web, Desktop (JVM).
+# Akkariin for YSU
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+> You cannot see this repository because it is transparent.
 
+仅供学习 Java Web 使用，作者不对使用本项目代码造成的任何损失负责。
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+理论支持的平台：Desktop (JVM), Android （手头没有苹果设备所以不支持 iOS）
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+## 功能
 
-You can open the web application by running the `:composeApp:wasmJsBrowserDevelopmentRun` Gradle task.
+如果你有想要的功能可以提 issue，最好带着逆向好的 API
+
+- ✅ 校园卡余额查询
+- ❌ 绩点查询
+- ❌ 课表
+- ❌ 图书馆空闲查询/预约
+- ❌ 社团推荐
+
+## License
+
+This project is licensed under the Apache License 2.0.
+
+***作者不对使用本项目代码造成的任何损失负责。***
