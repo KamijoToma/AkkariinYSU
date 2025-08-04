@@ -14,11 +14,10 @@
     - `src/`
       - `commonMain/`
         - `kotlin/`：共享Kotlin代码（如App.kt、页面、业务逻辑等）
-          - `cn/edu/ysu/ciallo/cardbalance/`：卡余额相关模块
-            - `CardBalanceData.kt`：卡余额数据模型、错误类型、结果封装
-            - `CardBalanceRepository.kt`：仓库接口，含Mock与Remote实现
-            - `CardBalanceViewModel.kt`：卡余额ViewModel
-            - `NetworkCookieManager.kt`：多API共用Cookie管理器
+          - `components/`：可复用UI组件（如卡余额卡片、图书馆卡片等）
+          - `home/`：主页相关模块
+          - `cardbalance/`：卡余额相关模块
+          - `ysu/`：远程API对接层
         - `composeResources/`：Compose资源
       - `androidMain/`：Android专用代码与资源
       - `jvmMain/`：JVM专用代码
@@ -30,13 +29,14 @@
 
 ## 主要功能模块
 - App.kt：应用入口，包含底部导航与页面切换
-- HomePage：主页，展示日程、电费、借书、图书馆、卡余额、校园网等信息卡片
+- HomePage：主页，组合各功能卡片组件
 - ClubRecommendPage：社团推荐页，展示社团列表
 - CardBalance：卡余额模块，支持本地模拟与真实API切换，完善错误处理
 
 ## 组件与页面结构
 - 使用`Scaffold`实现整体布局，`NavigationBar`实现底部导航
-- 各功能区块用`Card`+`Column`+`Row`组合
+- 各功能区块拆分为独立的可复用组件（如`CardBalanceCard`、`LibraryCard`等），统一放置于`components/`目录
+- 页面级组件（如HomePage、ClubRecommendPage）已独立为单独文件，便于维护和预览
 - 列表用`LazyColumn`实现
 - 图标用`Icon`（可后续替换为自定义资源）
 
@@ -49,14 +49,23 @@
 - 本地/远程数据切换：通过依赖注入或构造参数选择Mock或Remote实现，调试时用Mock，单元测试/真实使用用Remote。
 
 ### 相关目录
+- `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/components/`
+  - `CardBalanceCard.kt`：卡余额卡片UI组件
+  - `LibraryCard.kt`：图书馆卡片UI组件
+  - ...（其他可复用组件）
 - `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/home/`
   - `HomeData.kt`：首页数据模型与仓库接口
   - `HomeViewModel.kt`：首页ViewModel
+  - `HomePage.kt`：主页页面组件（已独立文件，含Compose预览）
+  - `ClubRecommendPage.kt`：社团推荐页面组件（已独立文件，含Compose预览）
 - `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/cardbalance/`
   - `CardBalanceData.kt`：卡余额数据模型、错误类型、结果封装
   - `CardBalanceRepository.kt`：仓库接口，含Mock与Remote实现
   - `CardBalanceViewModel.kt`：卡余额ViewModel
   - `NetworkCookieManager.kt`：多API共用Cookie管理器
+- `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/ysu/`
+  - `YsuEhallApi.kt`：E-Hall API客户端
+  - `YsuEhallApiFactory.kt`：API工厂与凭据管理
 - `composeApp/src/commonTest/kotlin/cn/edu/ysu/ciallo/cardbalance/`
   - `CardBalanceRepositoryTest.kt`：卡余额仓库单元测试
 
@@ -67,11 +76,18 @@
 - UI根据数据渲染Material3风格界面
 - 所有API共用Cookie，便于统一登录态管理
 
-## 约定
-- 业务逻辑与UI分离，后续可扩展ViewModel等架构
-- 资源与多平台适配可在各`*Main`目录下实现
-- API接口支持完善错误处理（如未登录、网络失败等）
-- 支持本地模拟数据与真实API切换，便于调试与测试
+## 组件拆分与复用
+- 每个功能区块（如卡余额、日程、电费、图书馆等）单独拆分为独立的Composable组件，统一放在`components/`目录
+- 页面级组件只负责组合和布局这些功能组件
+- 组件参数化，接收数据模型和加载状态，便于复用和测试
+- 组件拆分示例：
+  - `CardBalanceCard.kt`：只负责UI展示，接收`CardBalanceData`和加载状态作为参数
+  - `CardBalanceViewModel.kt`：负责数据加载、状态管理
+  - `HomePage.kt`：通过ViewModel获取数据，将数据传递给各功能组件
+- 拆分优势：
+  - 提高代码复用性和可维护性
+  - 页面结构清晰，便于扩展和测试
+  - 各业务模块职责单一，便于协作开发
 
 ## 远程API对接层设计 (YSU E-Hall)
 
