@@ -35,7 +35,7 @@ fun CardBalanceCard(
             Icon(Icons.Default.CreditCard, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(12.dp))
             Column {
-                Text("卡余额", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("校园卡余额", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 when (cardBalanceState) {
                     null -> Text("加载中...", fontSize = 14.sp)
                     is CardBalanceResult.Success -> Text(

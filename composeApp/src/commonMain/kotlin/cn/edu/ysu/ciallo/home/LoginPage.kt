@@ -6,7 +6,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import cn.edu.ysu.ciallo.ysu.LoginResult
 import cn.edu.ysu.ciallo.ysu.LoginUiState
 import cn.edu.ysu.ciallo.ysu.YsuEhallApiFactory
 import kotlinx.coroutines.launch
@@ -53,11 +52,25 @@ fun LoginPage(onLoginSuccess: () -> Unit) {
         }
         Spacer(modifier = Modifier.height(8.dp))
         when (loginState) {
-
-            is LoginUiState.Failure -> TODO()
-            LoginUiState.Idle -> TODO()
-            LoginUiState.Loading -> TODO()
-            LoginUiState.Success -> TODO()
+            is LoginUiState.Failure -> {
+                val message = (loginState as LoginUiState.Failure).reason
+                Text("登录失败：$message", color = MaterialTheme.colorScheme.error)
+            }
+            LoginUiState.Idle -> {
+                Text("请输入用户名和密码")
+            }
+            LoginUiState.Loading -> {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            LoginUiState.Success -> {
+                // 登录成功，回调
+                LaunchedEffect(Unit) {
+                    onLoginSuccess()
+                }
+                Text("登录成功！")
+            }
         }
     }
 }

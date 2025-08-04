@@ -1,8 +1,8 @@
 package cn.edu.ysu.ciallo.ysu
 
-import androidx.compose.ui.text.LinkAnnotation
 import io.ktor.client.*
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpRedirect
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.cookies.*
 import io.ktor.client.plugins.defaultRequest
@@ -13,11 +13,16 @@ import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.statement.bodyAsText
-import io.ktor.client.statement.request
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.date.getTimeMillis
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import io.ktor.util.toLowerCasePreservingASCIIRules
+import kotlinx.coroutines.sync.*
+import kotlin.math.*
+
+
 
 /**
  * 定义登录操作可能的结果。
@@ -85,13 +90,18 @@ class YsuEhallApi {
             json()
         }
         install(HttpCookies) {
-            storage = AcceptAllCookiesStorage()
+            storage = CustomCookieStorage()
         }
         install(Logging) {
             logger = Logger.SIMPLE
-            level = LogLevel.INFO
+            level = LogLevel.HEADERS
         }
-        followRedirects = false // 手动处理重定向
+        followRedirects = true
+        install(HttpRedirect) {
+            // 允许重定向
+            allowHttpsDowngrade = true
+            checkHttpMethod = true
+        }
         defaultRequest {
             header(
                 HttpHeaders.UserAgent,
@@ -136,11 +146,11 @@ class YsuEhallApi {
         }
     }
 
-    suspend fun login(username: String, password: String) {
+    suspend fun login(username: String, password: String) : LoginResult {
         _loginState.value = LoginUiState.Loading
         if (!fetchLoginPage()) {
             _loginState.value = LoginUiState.Failure("无法获取登录页面信息")
-            return
+            return LoginResult.Failure("无法获取登录页面信息")
         }
 
         // 检查是否需要验证码的逻辑可以根据需要添加
@@ -159,7 +169,7 @@ class YsuEhallApi {
         )
 
         try {
-            var response = client.submitForm(
+            val response = client.submitForm(
                 url = LOGIN_URL,
                 formParameters = Parameters.build {
                     data.forEach { (key, value) ->
@@ -168,40 +178,24 @@ class YsuEhallApi {
                 },
             )
 
-            var redirectCount = 0
-            while (response.status in listOf(HttpStatusCode.Found, HttpStatusCode.SeeOther) && redirectCount < 10) {
-                val location = response.headers[HttpHeaders.Location]
-                if (location != null) {
-                    println("Redirecting to: $location")
-                    response = client.get(if (response.status == HttpStatusCode.Found) {
-                        location
-                    } else {
-                        // location is /index.html, which is a relative URL
-                        val original_url = response.request.url
-                        original_url.protocol.name + "://" + original_url.host + location
-                    })
-                    redirectCount++
-                } else {
-                    _loginState.value = LoginUiState.Failure("登录重定向失败，未找到Location头")
-                    return
-                }
-            }
-
-            val finalUrl = response.request.url.toString()
             val responseText = response.bodyAsText()
 
-            if (response.status.isSuccess() && finalUrl.startsWith("$BASE_URL/index.html") && "统一身份认证" !in responseText) {
+            if (response.status == HttpStatusCode.Found) {
                 println("确认登录成功。")
                 _loginState.value = LoginUiState.Success
+                client.get(response.headers[HttpHeaders.Location]!!)
+                return LoginResult.Success
             } else {
                 val soup = com.fleeksoft.ksoup.Ksoup.parse(responseText)
                 val errorMsg = soup.getElementById("showErrorTip")?.text() ?: "登录重定向后验证失败"
                 println("登录失败：$errorMsg")
                 _loginState.value = LoginUiState.Failure(errorMsg)
+                return LoginResult.Failure(errorMsg)
             }
         } catch (e: Exception) {
             println("登录请求失败: ${e.message}")
             _loginState.value = LoginUiState.Failure("登录请求异常: ${e.message}")
+            return LoginResult.Failure("登录请求异常: ${e.message}")
         }
     }
 
@@ -222,12 +216,7 @@ class YsuEhallApi {
     suspend fun getCardBalance(): CardBalanceResponse? {
         val url = "$BASE_URL/publicapp/sys/myyktzd/mySmartCard/loadSmartCardBillMain.do"
         return try {
-            val response = client.get(url) {
-                // Ktor 默认情况下会为重定向的请求添加原始请求的 Host 头，
-                // 但目标服务器 (cer.ysu.edu.cn) 可能需要自己的 Host 头。
-                // 明确设置 Host 头可以避免一些潜在的服务器配置问题。
-                header(HttpHeaders.Host, Url(url).host)
-            }
+            val response = client.get(url)
             if (response.status.isSuccess()) {
                 response.body<CardBalanceResponse>()
             } else {
