@@ -73,5 +73,48 @@
 - API接口支持完善错误处理（如未登录、网络失败等）
 - 支持本地模拟数据与真实API切换，便于调试与测试
 
+## 远程API对接层设计 (YSU E-Hall)
+
+为了实现从燕山大学网上服务大厅 (E-Hall) 获取真实数据，我们将设计并实现一个独立的远程API对接层。该层将负责处理网络请求、用户认证、数据解析等任务，并与现有的 `Repository` 层进行集成。
+
+### 核心组件
+
+1.  **`YsuEhallApi`**: 一个中心化的API客户端类，封装了与E-Hall系统交互的所有网络请求逻辑。
+    -   **技术选型**: 使用 Ktor 客户端库，因为它提供了强大的多平台网络请求能力。
+    -   **主要职责**:
+        -   管理 `HttpClient` 实例，配置通用请求头、Cookie存储等。
+        -   实现登录流程 (`login` 方法)，包括获取登录页面、解析表单参数、加密密码以及处理登录响应。
+        -   提供各个业务接口的调用方法 (例如 `getCardBalance`)。
+    -   **位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/ysu/YsuEhallApi.kt`
+
+2.  **`YsuEhallApiFactory`**: 一个工厂类，用于创建和配置 `YsuEhallApi` 的实例。
+    -   **职责**:
+        -   提供一个单例的 `YsuEhallApi` 实例，确保应用内共享同一个登录会话 (Session)。
+        -   管理用户凭据 (用户名、密码)，在实际应用中可以对接安全存储。
+    -   **位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/ysu/YsuEhallApiFactory.kt`
+
+3.  **`RemoteCardBalanceRepository`**: `CardBalanceRepository` 接口的远程实现。
+    -   **职责**:
+        -   依赖 `YsuEhallApi` 来获取一卡通余额。
+        -   在调用接口前检查登录状态，如果未登录则自动执行登录。
+        -   将API返回的数据模型转换为App内部使用的 `CardBalanceData` 模型。
+    -   **位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/cardbalance/CardBalanceRepository.kt` (在此文件中新增实现)
+
+### 变更计划
+
+1.  **引入依赖**: 在 `build.gradle.kts` 中添加 Ktor (client, content-negotiation, serialization) 和 Ksoup (HTML解析) 的依赖。
+2.  **创建API层**:
+    -   实现 `YsuEhallApi.kt`，复现 Notebook 中的登录和数据获取逻辑。
+    -   实现 `YsuEhallApiFactory.kt` 来管理API实例和凭据。
+3.  **实现远程Repository**: 在 `CardBalanceRepository.kt` 中创建 `RemoteCardBalanceRepository` 类，通过 `YsuEhallApi` 获取数据。
+4.  **更新ViewModel**: 修改 `App.kt` 中 `CardBalanceViewModel` 的初始化逻辑，使其能够方便地在 `Mock` 和 `Remote` 实现之间切换。
+5.  **数据模型**: 创建 `YsuCardBalanceResponse.kt` 用于解析API返回的JSON数据。
+
+### 优势
+
+-   **松耦合**: UI层 (Compose) -> ViewModel -> Repository -> API层。每一层都只与相邻的层交互，API逻辑的变更不会影响到UI。
+-   **可扩展性**: 未来需要增加新的API（如获取课表、成绩），只需在 `YsuEhallApi` 中增加新的方法，并创建对应的 `RemoteRepository` 实现即可，对现有代码影响极小。
+-   **可测试性**: 依赖注入的设计使得我们可以轻松地为 `ViewModel` 提供 `MockRepository` 进行单元测试，也可以独立测试 `RemoteRepository` 和 `YsuEhallApi`。
+
 ---
 如需补充具体页面、功能、资源等细节，请在本文件继续记录。

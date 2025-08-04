@@ -65,11 +65,32 @@ fun MainScreen() {
 fun HomePage(modifier: Modifier = Modifier) {
     val viewModel = rememberHomeViewModel()
     val data = viewModel.homeData.value
-    // 卡余额ViewModel，实际可根据需要切换为RemoteCardBalanceRepository
-    val cardBalanceViewModel = remember { CardBalanceViewModel(MockCardBalanceRepository()) }
+
+    // --- 卡余额模块 ---
+    // true 使用真实API, false 使用模拟数据
+    val useRemoteApi = true
+
+    // 在使用远程API时，设置登录凭据
+    // TODO: 在实际应用中，应通过登录界面获取并安全地存储这些信息
+    if (useRemoteApi) {
+        cn.edu.ysu.ciallo.ysu.YsuEhallApiFactory.setCredentials("xxxxxxxxx", "xxxxxxxxx")
+    }
+
+    // 根据 useRemoteApi 标志选择不同的 Repository
+    val cardBalanceViewModel = remember(useRemoteApi) {
+        val repository = if (useRemoteApi) {
+            cn.edu.ysu.ciallo.cardbalance.RemoteCardBalanceRepository()
+        } else {
+            MockCardBalanceRepository()
+        }
+        CardBalanceViewModel(repository)
+    }
     val cardBalanceState = cardBalanceViewModel.uiState.value
+
     // 首次进入自动加载卡余额
     LaunchedEffect(Unit) { cardBalanceViewModel.loadCardBalance() }
+    // --- 卡余额模块结束 ---
+
     if (data == null) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -158,10 +179,13 @@ fun HomePage(modifier: Modifier = Modifier) {
                                     fontSize = 14.sp
                                 )
                                 is CardBalanceResult.Failure -> Text(
-                                    when (cardBalanceState.error) {
-                                        cn.edu.ysu.ciallo.cardbalance.CardBalanceError.NotLoggedIn -> "未登录"
+                                    when (val error = cardBalanceState.error) {
+                                        is cn.edu.ysu.ciallo.cardbalance.CardBalanceError.LoginFailed -> "登录失败: ${error.reason}"
+                                        cn.edu.ysu.ciallo.cardbalance.CardBalanceError.CaptchaRequired -> "需要验证码"
+                                        cn.edu.ysu.ciallo.cardbalance.CardBalanceError.NotLoggedIn -> "未提供凭据"
                                         cn.edu.ysu.ciallo.cardbalance.CardBalanceError.NetworkError -> "网络错误"
-                                        else -> "获取失败"
+                                        cn.edu.ysu.ciallo.cardbalance.CardBalanceError.UnknownError -> "未知错误"
+                                        is cn.edu.ysu.ciallo.cardbalance.CardBalanceError.Custom -> error.message
                                     },
                                     color = Color.Red,
                                     fontSize = 14.sp
