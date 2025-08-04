@@ -15,12 +15,8 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.util.date.getTimeMillis
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import io.ktor.util.toLowerCasePreservingASCIIRules
-import kotlinx.coroutines.sync.*
-import kotlin.math.*
 
 
 
@@ -73,10 +69,6 @@ data class CardData(
 class YsuEhallApi {
     private val _loginState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val loginState = _loginState.asStateFlow()
-
-    fun resetLoginState() {
-        _loginState.value = LoginUiState.Idle
-    }
 
     companion object {
         private const val LOGIN_URL = "https://cer.ysu.edu.cn/authserver/login?service=https%3A%2F%2Fehall.ysu.edu.cn%2Flogin"

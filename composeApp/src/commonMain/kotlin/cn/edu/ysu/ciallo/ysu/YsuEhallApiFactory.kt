@@ -11,9 +11,6 @@ object YsuEhallApiFactory {
     private var username = ""
     private var password = ""
 
-    // 单例的 NetworkCookieManager，用于在API层和Repository层之间共享Cookie
-    private val cookieManager = NetworkCookieManager()
-
     // YsuEhallApi 的懒加载单例实例
     private val apiInstance: YsuEhallApi by lazy {
         YsuEhallApi()

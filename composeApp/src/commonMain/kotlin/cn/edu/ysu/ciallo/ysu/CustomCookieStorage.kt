@@ -17,7 +17,7 @@ class CustomCookieStorage : CookiesStorage {
         mutex.withLock {
             if (cookie.name.equals("CASTGC", ignoreCase = true)) {
                 // if CASTGC cookie is present in cookieJar and its value is not empty, return
-                if (cookie.value.isBlank() && cookieJar.any { (url, c) -> /*url.host == requestUrl.host &&*/ c.name.equals("CASTGC", ignoreCase = true) && c.value.isNotEmpty() }) {
+                if (cookie.value.isBlank() && cookieJar.any { (_, c) -> /*url.host == requestUrl.host &&*/ c.name.equals("CASTGC", ignoreCase = true) && c.value.isNotEmpty() }) {
                     println("CASTGC cookie already exists with a non-empty value, not adding again.")
                     return
                 }
@@ -37,14 +37,6 @@ class CustomCookieStorage : CookiesStorage {
 
     override fun close() {
         cookieJar.clear()
-    }
-
-    // 可选：清理过期cookie
-    suspend fun cleanExpired() {
-        val now = System.currentTimeMillis() / 1000
-        mutex.withLock {
-            cookieJar.removeAll { (_, cookie) -> cookie.expires != null && cookie.expires!!.timestamp <= now }
-        }
     }
 }
 
