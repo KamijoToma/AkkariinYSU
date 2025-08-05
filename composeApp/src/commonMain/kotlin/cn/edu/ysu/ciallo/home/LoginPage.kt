@@ -5,7 +5,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -16,78 +18,131 @@ import cn.edu.ysu.ciallo.ysu.LoginUiState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplicationPreview
 import org.koin.compose.koinInject
+import androidx.compose.ui.text.style.TextAlign
 
 class LoginPage : Screen {
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        Column {
-            // 添加返回按钮
-            IconButton(onClick = { navigator.pop() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = { Text("登录") },
+                    navigationIcon = {
+                        IconButton(onClick = { navigator.pop() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        }
+                    }
+                )
             }
-            // 其余内容保持不变
-            LoginPageContent(onLoginSuccess = { navigator.pop() })
+        ) { paddingValues ->
+            LoginPageContent(
+                modifier = Modifier.padding(paddingValues),
+                onLoginSuccess = { navigator.pop() }
+            )
         }
     }
 }
 
 @Composable
-fun LoginPageContent(onLoginSuccess: () -> Unit, viewModel: LoginViewModel = koinInject()) {
+fun LoginPageContent(
+    modifier: Modifier = Modifier,
+    onLoginSuccess: () -> Unit,
+    viewModel: LoginViewModel = koinInject()
+) {
     val loginState by viewModel.loginState.collectAsState()
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        TextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("用户名") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("密码") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                viewModel.login(username, password)
-            },
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = 32.dp), // 调整整体内边距
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("登录")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        when (loginState) {
-            is LoginUiState.Failure -> {
-                val message = (loginState as LoginUiState.Failure).reason
-                Text("登录失败：$message", color = MaterialTheme.colorScheme.error)
-            }
-            LoginUiState.Idle -> {
-                Text("请输入用户名和密码")
-            }
-            LoginUiState.Loading -> {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                    CircularProgressIndicator()
+            Text(
+                text = "燕山大学统一身份认证",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 48.dp) // 标题与输入框之间的间距
+            )
+
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("用户名") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("密码") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation()
+            )
+            Spacer(modifier = Modifier.height(32.dp)) // 输入框与按钮之间的间距
+            Button(
+                onClick = {
+                    viewModel.login(username, password)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = loginState != LoginUiState.Loading
+            ) {
+                if (loginState == LoginUiState.Loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("登录")
                 }
             }
-            LoginUiState.Success -> {
-                // 登录成功，回调
-                LaunchedEffect(Unit) {
-                    onLoginSuccess()
+            Spacer(modifier = Modifier.height(24.dp)) // 按钮与状态信息之间的间距
+            when (loginState) {
+                is LoginUiState.Failure -> {
+                    val message = (loginState as LoginUiState.Failure).reason
+                    Text(
+                        text = "登录失败：$message",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
+                    )
                 }
-                Text("登录成功！")
+                LoginUiState.Idle -> {
+                    Text(
+                        text = "请输入用户名和密码",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                LoginUiState.Loading -> {
+                    // 进度指示器已移到按钮内部
+                }
+                LoginUiState.Success -> {
+                    // 登录成功，回调
+                    LaunchedEffect(Unit) {
+                        onLoginSuccess()
+                    }
+                    Text(
+                        text = "登录成功！",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -97,6 +152,6 @@ fun LoginPageContent(onLoginSuccess: () -> Unit, viewModel: LoginViewModel = koi
 @Preview
 fun PreviewLoginPage() {
     KoinApplicationPreview(application = { modules(previewModule) }) {
-        LoginPageContent(onLoginSuccess = {})
+        LoginPageContent(onLoginSuccess = {}, modifier = Modifier.fillMaxSize())
     }
 }

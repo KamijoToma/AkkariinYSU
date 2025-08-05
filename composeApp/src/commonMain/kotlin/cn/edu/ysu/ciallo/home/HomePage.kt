@@ -1,21 +1,15 @@
 package cn.edu.ysu.ciallo.home
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
@@ -29,6 +23,8 @@ import cn.edu.ysu.ciallo.di.previewModule
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplicationPreview
 import org.koin.compose.koinInject
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 class HomePageTab : Tab {
     @Composable
@@ -50,6 +46,7 @@ class HomePageTab : Tab {
         )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomePageContent(
     modifier: Modifier = Modifier,
@@ -65,20 +62,27 @@ fun HomePageContent(
 
     val homeData = homeViewModel.homeData.value
 
-
-    Box(modifier = modifier.fillMaxSize()) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("主页") }
+            )
+        },
+        modifier = modifier.fillMaxSize()
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp), // 调整整体内边距
+            verticalArrangement = Arrangement.spacedBy(16.dp) // 卡片之间的统一间距
         ) {
-
+            Spacer(modifier = Modifier.height(8.dp)) // 顶部间距
             Text(
                 "晚上好，${homeData.userName}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             if (!homeData.logged) {
@@ -89,11 +93,13 @@ fun HomePageContent(
                 )
             } else {
                 AssistChip(
-                    onClick = {},
+                    onClick = { /* TODO: 可以考虑跳转到个人信息页 */ },
                     label = { Text("已登录：${homeData.studentType}") },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp)) // 欢迎语和卡片之间的间距
+
             ScheduleCard(
                 today = "data.scheduleToday",
                 tomorrow = "data.scheduleTomorrow",
@@ -112,6 +118,7 @@ fun HomePageContent(
             NetworkCard(
                 networkInfo = "data.networkInfo"
             )
+            Spacer(modifier = Modifier.height(8.dp)) // 底部间距
         }
     }
 }
