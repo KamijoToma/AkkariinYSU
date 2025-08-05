@@ -1,175 +1,93 @@
-# 项目技术与结构说明
+# 项目结构与技术说明
 
 ## 技术栈
-- Kotlin Multiplatform (KMP)
-- Jetpack Compose Multiplatform (JCM)
-- Compose Material3 组件库
-- 资源管理：composeResources
-- 多平台支持：Android、JVM、WASM
+- **Kotlin Multiplatform (KMP)**: 支持多平台开发。
+- **Jetpack Compose Multiplatform (JCM)**: 用于构建跨平台的现代化UI。
+- **Compose Material3**: 提供现代化的UI组件。
+- **Ktor**: 用于网络请求和API交互。
+- **Kotlinx Serialization**: 用于JSON解析。
 
-## 目录结构
-- 根目录
-  - `build.gradle.kts`、`settings.gradle.kts`：KMP项目配置
-  - `composeApp/`：主模块
+## 项目目录结构
+- **根目录**
+  - `build.gradle.kts`、`settings.gradle.kts`: 项目配置文件。
+  - `composeApp/`: 主模块。
     - `src/`
-      - `commonMain/`
-        - `kotlin/`：共享Kotlin代码（如App.kt、页面、业务逻辑等）
-          - `components/`：可复用UI组件（如卡余额卡片、图书馆卡片等）
-          - `home/`：主页相关模块
-          - `cardbalance/`：卡余额相关模块
-          - `ysu/`：远程API对接层
-        - `composeResources/`：Compose资源
-      - `androidMain/`：Android专用代码与资源
-      - `jvmMain/`：JVM专用代码
-      - `wasmJsMain/`：WASM/JS专用代码与资源
-    - `build/`：编译输出
-- `demo/`：演示图片等
-- `commonTest/`
-  - `kotlin/cn/edu/ysu/ciallo/cardbalance/CardBalanceRepositoryTest.kt`：卡余额仓库单元测试
+      - `commonMain/`: 共享代码。
+        - `kotlin/`: 包含业务逻辑和UI代码。
+          - `components/`: 可复用的UI组件。
+          - `home/`: 主页相关模块。
+          - `cardbalance/`: 卡余额相关模块。
+          - `ysu/`: 远程API对接层。
+        - `composeResources/`: Compose资源。
+      - `androidMain/`: Android平台专用代码。
+      - `jvmMain/`: JVM平台专用代码。
+      - `wasmJsMain/`: WASM/JS平台专用代码。
+    - `build/`: 编译输出。
+- `demo/`: 演示图片等。
+- `commonTest/`: 单元测试代码。
 
-## 主要功能模块
-- App.kt：应用入口，包含底部导航与页面切换
-- HomePage：主页，组合各功能卡片组件
-- ClubRecommendPage：社团推荐页，展示社团列表
-- CardBalance：卡余额模块，支持本地模拟与真实API切换，完善错误处理
+## 核心功能模块
 
-## 组件与页面结构
-- 使用`Scaffold`实现整体布局，`NavigationBar`实现底部导航
-- 各功能区块拆分为独立的可复用组件（如`CardBalanceCard`、`LibraryCard`等），统一放置于`components/`目录
-- 页面级组件（如HomePage、ClubRecommendPage）已独立为单独文件，便于维护和预览
-- 列表用`LazyColumn`实现
-- 图标用`Icon`（可后续替换为自定义资源）
+### 主页模块
+- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/home/HomePage.kt`
+- **功能**:
+  - 提供底部导航和页面切换。
+  - 组合各功能卡片组件。
 
-## 数据层与状态管理
-- 数据与UI分离：业务数据通过Repository接口获取，支持后端API对接，UI仅负责展示。
-- ViewModel：如HomeViewModel、CardBalanceViewModel，负责数据加载与状态管理，支持多平台。
-- 数据模型：如HomeData、LibraryStatus、CardBalanceData，定义各区块展示数据结构。
-- Repository接口：如HomeRepository、CardBalanceRepository，支持本地假数据与后端API切换。
-- Cookie管理：所有API共用NetworkCookieManager，便于多API登录态复用。
-- 本地/远程数据切换：通过依赖注入或构造参数选择Mock或Remote实现，调试时用Mock，单元测试/真实使用用Remote。
+### 卡余额模块
+- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/cardbalance/`
+- **功能**:
+  - 显示卡余额信息。
+  - 支持本地模拟和真实API切换。
+  - 错误处理完善。
 
-### 相关目录
-- `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/components/`
-  - `CardBalanceCard.kt`：卡余额卡片UI组件
-  - `LibraryCard.kt`：图书馆卡片UI组件
-  - ...（其他可复用组件）
-- `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/home/`
-  - `HomeData.kt`：首页数据模型与仓库接口
-  - `HomeViewModel.kt`：首页ViewModel
-  - `HomePage.kt`：主页页面组件（已独立文件，含Compose预览）
-  - `ClubRecommendPage.kt`：社团推荐页面组件（已独立文件，含Compose预览）
-  - `LoginPage.kt`：登录页面组件
-- `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/cardbalance/`
-  - `CardBalanceData.kt`：卡余额数据模型、错误类型、结果封装
-  - `CardBalanceRepository.kt`：仓库接口，含Mock与Remote实现
-  - `CardBalanceViewModel.kt`：卡余额ViewModel
-  - `NetworkCookieManager.kt`：多API共用Cookie管理器
-- `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/ysu/`
-  - `YsuEhallApi.kt`：E-Hall API客户端
-  - `YsuEhallApiFactory.kt`：API工厂与凭据管理
-- `composeApp/src/commonTest/kotlin/cn/edu/ysu/ciallo/cardbalance/`
-  - `CardBalanceRepositoryTest.kt`：卡余额仓库单元测试
-
-### 示例流程
-- UI页面（如HomePage）通过ViewModel获取数据
-- ViewModel调用Repository异步加载数据
-- Repository可对接本地假数据或后端API
-- UI根据数据渲染Material3风格界面
-- 所有API共用Cookie，便于统一登录态管理
-
-## 组件拆分与复用
-- 每个功能区块（如卡余额、日程、电费、图书馆等）单独拆分为独立的Composable组件，统一放在`components/`目录
-- 页面级组件只负责组合和布局这些功能组件
-- 组件参数化，接收数据模型和加载状态，便于复用和测试
-- 组件拆分示例：
-  - `CardBalanceCard.kt`：只负责UI展示，接收`CardBalanceData`和加载状态作为参数
-  - `CardBalanceViewModel.kt`：负责数据加载、状态管理
-  - `HomePage.kt`：通过ViewModel获取数据，将数据传递给各功能组件
-- 拆分优势：
-  - 提高代码复用性和可维护性
-  - 页面结构清晰，便于扩展和测试
-  - 各业务模块职责单一，便于协作开发
-
-## 远程API对接层设计 (YSU E-Hall)
-
-为了实现从燕山大学网上服务大厅 (E-Hall) 获取真实数据，我们将设计并实现一个独立的远程API对接层。该层将负责处理网络请求、用户认证、数据解析等任务，并与现有的 `Repository` 层进行集成。
-
-### 核心组件
-
-1.  **`YsuEhallApi`**: 一个中心化的API客户端类，封装了与E-Hall系统交互的所有网络请求逻辑。
-    -   **技术选型**: 使用 Ktor 客户端库，因为它提供了强大的多平台网络请求能力。
-    -   **主要职责**:
-        -   管理 `HttpClient` 实例，配置通用请求头、Cookie存储等。
-        -   实现登录流程 (`login` 方法)，包括获取登录页面、解析表单参数、加密密码以及处理登录响应。
-        -   提供各个业务接口的调用方法 (例如 `getCardBalance`)。
-    -   **位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/ysu/YsuEhallApi.kt`
-
-2.  **`YsuEhallApiFactory`**: 一个工厂类，用于创建和配置 `YsuEhallApi` 的实例。
-    -   **职责**:
-        -   提供一个单例的 `YsuEhallApi` 实例，确保应用内共享同一个登录会话 (Session)。
-        -   管理用户凭据 (用户名、密码)，在实际应用中可以对接安全存储。
-    -   **位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/ysu/YsuEhallApiFactory.kt`
-
-3.  **`RemoteCardBalanceRepository`**: `CardBalanceRepository` 接口的远程实现。
-    -   **职责**:
-        -   依赖 `YsuEhallApi` 来获取一卡通余额。
-        -   在调用接口前检查登录状态，如果未登录则自动执行登录。
-        -   将API返回的数据模型转换为App内部使用的 `CardBalanceData` 模型。
-    -   **位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/cardbalance/CardBalanceRepository.kt` (在此文件中新增实现)
-
-### 变更计划
-
-1.  **引入依赖**: 在 `build.gradle.kts` 中添加 Ktor (client, content-negotiation, serialization) 和 Ksoup (HTML解析) 的依赖。
-2.  **创建API层**:
-    -   实现 `YsuEhallApi.kt`，复现 Notebook 中的登录和数据获取逻辑。
-    -   实现 `YsuEhallApiFactory.kt` 来管理API实例和凭据。
-3.  **实现远程Repository**: 在 `CardBalanceRepository.kt` 中创建 `RemoteCardBalanceRepository` 类，通过 `YsuEhallApi` 获取数据。
-4.  **更新ViewModel**: 修改 `App.kt` 中 `CardBalanceViewModel` 的初始化逻辑，使其能够方便地在 `Mock` 和 `Remote` 实现之间切换。
-5.  **数据模型**: 创建 `YsuCardBalanceResponse.kt` 用于解析API返回的JSON数据。
-
-### 优势
-
--   **松耦合**: UI层 (Compose) -> ViewModel -> Repository -> API层。每一层都只与相邻的层交互，API逻辑的变更不会影响到UI。
--   **可扩展性**: 未来需要增加新的API（如获取课表、成绩），只需在 `YsuEhallApi` 中增加新的方法，并创建对应的 `RemoteRepository` 实现即可，对现有代码影响极小。
--   **可测试性**: 依赖注入的设计使得我们可以轻松地为 `ViewModel` 提供 `MockRepository` 进行单元测试，也可以独立测试 `RemoteRepository` 和 `YsuEhallApi`。
-
-## 登录功能
-
-### 登录页面
+### 登录功能
 - **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/home/LoginPage.kt`
 - **功能**:
   - 提供用户名和密码输入框。
   - 提供登录按钮，调用 `YsuEhallApi` 的 `login` 方法。
   - 显示登录状态（成功或失败）。
 
-### HomePage更新
-- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/home/HomePage.kt`
-- **功能**:
-  - 添加一个 `AssistChip` 按钮，点击后导航到 `LoginPage`。
-  - 如果未登录，显示提示信息。
-
-### ViewModel更新
-- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/home/HomeViewModel.kt`
-- **功能**:
-  - 添加登录状态管理。
-  - 提供登录方法，调用 `YsuEhallApi` 的 `login` 方法并更新状态。
-
-### YsuEhallApi更新
-- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/ysu/YsuEhallApi.kt`
-- **功能**:
-  - 确保 `login` 方法支持多次调用。
-  - 提供登录状态检查方法。
-
-### CardBalanceCard组件更新
-- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/components/CardBalanceCard.kt`
-- **功能**:
-  - 如果未登录，显示提示信息并提供跳转到 `LoginPage` 的按钮。
+### 远程API对接层
+- **文件位置**: `composeApp/src/commonMain/kotlin/cn/edu/ysu/ciallo/ysu/`
+- **核心组件**:
+  1. **`YsuEhallApi`**: 封装与E-Hall系统交互的网络请求逻辑。
+     - **职责**:
+       - 管理 `HttpClient` 实例。
+       - 实现登录流程和业务接口调用。
+       - 定义登录结果和UI状态。
+     - **位置**: `YsuEhallApi.kt`
+  2. **`YsuEhallApiFactory`**: 提供 `YsuEhallApi` 的单例实例。
+     - **职责**:
+       - 管理用户凭据。
+       - 确保应用内共享同一登录会话。
+     - **位置**: `YsuEhallApiFactory.kt`
 
 ### 示例流程
-- 用户在 `HomePage` 点击登录按钮，跳转到 `LoginPage`。
-- 用户输入用户名和密码，点击登录。
-- 登录成功后，返回 `HomePage`，并刷新各组件数据。
-- 如果登录失败，显示错误信息并允许重试。
+1. 用户在 `HomePage` 点击登录按钮，跳转到 `LoginPage`。
+2. 用户输入用户名和密码，点击登录。
+3. 登录成功后，返回 `HomePage`，并刷新各组件数据。
+4. 如果登录失败，显示错误信息并允许重试。
+
+## 数据层与状态管理
+- **ViewModel**: 负责数据加载与状态管理。
+- **Repository接口**: 提供本地假数据和远程API的切换。
+- **数据模型**: 定义各模块的数据结构。
+- **Cookie管理**: 统一管理API登录态。
+
+## 组件拆分与复用
+- **组件设计**:
+  - 每个功能区块拆分为独立的Composable组件。
+  - 页面级组件负责组合和布局功能组件。
+- **拆分示例**:
+  - `CardBalanceCard.kt`: 负责UI展示。
+  - `CardBalanceViewModel.kt`: 负责数据加载和状态管理。
+  - `HomePage.kt`: 组合各功能组件。
+
+## 优势
+- **松耦合**: UI层与数据层分离。
+- **可扩展性**: 便于增加新功能。
+- **可测试性**: 支持单元测试和Mock数据调试。
 
 ---
 如需补充具体页面、功能、资源等细节，请在本文件继续记录。
