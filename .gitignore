@@ -17,3 +17,4 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 composeApp/src/commonTest/kotlin/cn/edu/ysu/ciallo/ysu/YsuEhallApiCredentials.kt
+composeApp/ysu_cookies.json
