@@ -41,9 +41,11 @@ class CustomCookieStorage : CookiesStorage {
     private fun Cookie.toSerializable(): SerializableCookie = SerializableCookie(
         name, value, expires?.timestamp, domain, path, secure, httpOnly
     )
+
     private fun SerializableCookie.toCookie(): Cookie = Cookie(
         name, value, CookieEncoding.URI_ENCODING, 0, expires?.let { GMTDate(it) }, domain, path, secure, httpOnly
     )
+
     private fun Url.toSerializable(): SerializableUrl = SerializableUrl(protocol.name, host, port, fullPath)
     private fun SerializableUrl.toUrl(): Url = Url("$protocol://$host${if (port != 0) ":$port" else ""}$path")
 
@@ -74,7 +76,11 @@ class CustomCookieStorage : CookiesStorage {
         mutex.withLock {
             if (cookie.name.equals("CASTGC", ignoreCase = true)) {
                 // if CASTGC cookie is present in cookieJar and its value is not empty, return
-                if (cookie.value.isBlank() && cookieJar.any { (_, c) -> /*url.host == requestUrl.host &&*/ c.name.equals("CASTGC", ignoreCase = true) && c.value.isNotEmpty() }) {
+                if (cookie.value.isBlank() && cookieJar.any { (_, c) -> /*url.host == requestUrl.host &&*/ c.name.equals(
+                        "CASTGC",
+                        ignoreCase = true
+                    ) && c.value.isNotEmpty()
+                    }) {
                     println("CASTGC cookie already exists with a non-empty value, not adding again.")
                     return
                 }

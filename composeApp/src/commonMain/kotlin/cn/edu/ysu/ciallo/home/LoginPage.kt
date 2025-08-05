@@ -120,6 +120,7 @@ fun LoginPageContent(
                         textAlign = TextAlign.Center
                     )
                 }
+
                 LoginUiState.Idle -> {
                     Text(
                         text = "请输入用户名和密码",
@@ -128,9 +129,11 @@ fun LoginPageContent(
                         textAlign = TextAlign.Center
                     )
                 }
+
                 LoginUiState.Loading -> {
                     // 进度指示器已移到按钮内部
                 }
+
                 LoginUiState.Success -> {
                     // 登录成功，回调
                     LaunchedEffect(Unit) {

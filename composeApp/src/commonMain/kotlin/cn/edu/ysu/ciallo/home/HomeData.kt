@@ -69,11 +69,11 @@ class RemoteHomeRepository : HomeRepository {
         var studentType = "<UNK>";
         var userName = "阿卡林";
         val user_info = api.getLoginUser()
-        if(user_info != null && user_info.data != null) {
+        if (user_info != null && user_info.data != null) {
             logged = true
             studentType = user_info.data.categoryName ?: "<UNK>"
             userName = user_info.data.userName ?: "Akari"
-        }else{
+        } else {
             logged = false
             studentType = "<未登录>"
         }

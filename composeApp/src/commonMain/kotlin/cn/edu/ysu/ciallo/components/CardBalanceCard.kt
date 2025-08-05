@@ -41,12 +41,15 @@ fun CardBalanceCard(
                     is CardBalanceResult.Success -> Text(
                         "￥${String.format("%.2f", cardBalanceState.data.balance)} (更新于${
                             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                                .format(java.time.Instant.ofEpochMilli(cardBalanceState.data.lastUpdate)
-                                    .atZone(java.time.ZoneId.systemDefault())
-                                    .toLocalDateTime())
+                                .format(
+                                    java.time.Instant.ofEpochMilli(cardBalanceState.data.lastUpdate)
+                                        .atZone(java.time.ZoneId.systemDefault())
+                                        .toLocalDateTime()
+                                )
                         })",
                         fontSize = 14.sp
                     )
+
                     is CardBalanceResult.Failure -> Text(
                         when (val error = cardBalanceState.error) {
                             is CardBalanceError.LoginFailed -> "登录失败: ${error.reason}"

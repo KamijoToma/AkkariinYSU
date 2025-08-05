@@ -67,7 +67,8 @@ class YsuEhallApi {
     val loginState = _loginState.asStateFlow()
 
     companion object {
-        private const val LOGIN_URL = "https://cer.ysu.edu.cn/authserver/login?service=https%3A%2F%2Fehall.ysu.edu.cn%2Flogin"
+        private const val LOGIN_URL =
+            "https://cer.ysu.edu.cn/authserver/login?service=https%3A%2F%2Fehall.ysu.edu.cn%2Flogin"
         private const val CHECK_CAPTCHA_URL = "https://cer.ysu.edu.cn/authserver/checkNeedCaptcha.htl"
         private const val CAPTCHA_URL = "https://cer.ysu.edu.cn/authserver/getCaptcha.htl"
         private const val BASE_URL = "https://ehall.ysu.edu.cn"
@@ -134,7 +135,7 @@ class YsuEhallApi {
         }
     }
 
-    suspend fun login(username: String, password: String) : LoginResult {
+    suspend fun login(username: String, password: String): LoginResult {
         _loginState.value = LoginUiState.Loading
         if (!fetchLoginPage()) {
             _loginState.value = LoginUiState.Failure("无法获取登录页面信息")
