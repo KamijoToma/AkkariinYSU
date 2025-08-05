@@ -1,7 +1,5 @@
 package cn.edu.ysu.ciallo.ysu
 
-import cn.edu.ysu.ciallo.cardbalance.NetworkCookieManager
-
 /**
  * YsuEhallApi 的工厂类，用于创建和管理API客户端实例。
  * 采用单例模式确保应用内共享同一个登录会话。

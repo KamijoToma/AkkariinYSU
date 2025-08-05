@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cn.edu.ysu.ciallo.cardbalance.CardBalanceError
 import cn.edu.ysu.ciallo.cardbalance.CardBalanceData
+import cn.edu.ysu.ciallo.cardbalance.CardBalanceError
 import cn.edu.ysu.ciallo.cardbalance.CardBalanceResult
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import java.time.format.DateTimeFormatter

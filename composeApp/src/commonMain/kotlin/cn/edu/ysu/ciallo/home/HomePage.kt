@@ -1,12 +1,16 @@
 package cn.edu.ysu.ciallo.home
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -17,22 +21,20 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import cn.edu.ysu.ciallo.cardbalance.CardBalanceViewModel
-import cn.edu.ysu.ciallo.cardbalance.MockCardBalanceRepository
-import cn.edu.ysu.ciallo.cardbalance.RemoteCardBalanceRepository
 import cn.edu.ysu.ciallo.components.CardBalanceCard
 import cn.edu.ysu.ciallo.components.LibraryCard
 import cn.edu.ysu.ciallo.components.NetworkCard
 import cn.edu.ysu.ciallo.components.ScheduleCard
+import cn.edu.ysu.ciallo.di.previewModule
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.KoinApplicationPreview
+import org.koin.compose.koinInject
 
-class HomePageTab(
-    private val useRemoteApi: Boolean = true
-) : Tab {
+class HomePageTab : Tab {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         HomePageContent(
-            useRemoteApi = useRemoteApi,
             onNavigateToLogin = {
                 navigator.parent?.push(LoginPage()) // 跳转到登录页面
             }
@@ -51,30 +53,17 @@ class HomePageTab(
 @Composable
 fun HomePageContent(
     modifier: Modifier = Modifier,
-    useRemoteApi: Boolean = true,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    homeViewModel: HomeViewModel = koinInject(),
+    cardBalanceViewModel: CardBalanceViewModel = koinInject()
 ) {
-    val homeViewModel: HomeViewModel = remember(useRemoteApi) {
-        if (useRemoteApi) {
-            HomeViewModel(RemoteHomeRepository())
-        } else {
-            HomeViewModel(FakeHomeRepository())
-        }
+    // Load data when the composable is first launched
+    LaunchedEffect(Unit) {
+        homeViewModel.loadData()
+        cardBalanceViewModel.loadCardBalance()
     }
 
-    // refresh home data
-    homeViewModel.loadData()
     val homeData = homeViewModel.homeData.value
-
-
-    val cardBalanceViewModel = remember(useRemoteApi) {
-        val repository = if (useRemoteApi) {
-            RemoteCardBalanceRepository()
-        } else {
-            MockCardBalanceRepository()
-        }
-        CardBalanceViewModel(repository)
-    }
 
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -120,9 +109,6 @@ fun HomePageContent(
                 onRefresh = { cardBalanceViewModel.loadCardBalance() },
                 onDetails = { /* TODO: 跳转到卡详情 */ },
             )
-            LaunchedEffect(homeData){
-                cardBalanceViewModel.loadCardBalance()
-            }
             NetworkCard(
                 networkInfo = "data.networkInfo"
             )
@@ -133,6 +119,7 @@ fun HomePageContent(
 @Preview
 @Composable
 fun PreviewHomePage() {
-    // 预览时用Mock数据
-    HomePageContent(useRemoteApi = false, onNavigateToLogin = {})
+    KoinApplicationPreview(application = { modules(previewModule) }) {
+        HomePageContent(onNavigateToLogin = {})
+    }
 }

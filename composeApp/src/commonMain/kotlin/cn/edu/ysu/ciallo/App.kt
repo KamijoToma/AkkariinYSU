@@ -1,33 +1,34 @@
 package cn.edu.ysu.ciallo
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import cn.edu.ysu.ciallo.home.ClubRecommendPage
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import cafe.adriel.voyager.navigator.tab.TabNavigator
-import cn.edu.ysu.ciallo.home.HomePageTab
-import cn.edu.ysu.ciallo.home.LoginPage
-import cafe.adriel.voyager.navigator.Navigator
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import cafe.adriel.voyager.navigator.tab.CurrentTab
+import cafe.adriel.voyager.navigator.tab.TabNavigator
+import cn.edu.ysu.ciallo.di.appModule
+import cn.edu.ysu.ciallo.di.previewModule
+import cn.edu.ysu.ciallo.home.ClubRecommendPage
+import cn.edu.ysu.ciallo.home.HomePageTab
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.KoinApplicationPreview
+import org.koin.core.context.startKoin
 
 @Composable
-fun MainScreen() {
-    Navigator(HomePageTab()) { navigator ->
-        if (navigator.lastItem is LoginPage) {
-            navigator.lastItem.Content()
-        } else {
+fun App() {
+    startKoin { modules(appModule) }
+        MaterialTheme {
             TabNavigator(HomePageTab()) { tabNavigator ->
                 Scaffold(
+                    content = {
+                        Box(modifier = Modifier.padding(it)) {
+                            CurrentTab()
+                        }
+                    },
                     bottomBar = {
                         NavigationBar {
                             NavigationBarItem(
@@ -44,23 +45,15 @@ fun MainScreen() {
                             )
                         }
                     }
-                ) { paddingValues ->
-                    Box(modifier = Modifier.padding(paddingValues)) {
-                        tabNavigator.current.Content()
-                    }
-                }
+                )
             }
         }
-    }
 }
 
-@Composable
-fun App() {
-    MaterialTheme { MainScreen() }
-}
-
-@Composable
 @Preview
+@Composable
 fun PreviewApp() {
-    MainScreen()
+    KoinApplicationPreview(application = { modules(previewModule) }) {
+        App()
+    }
 }

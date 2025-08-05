@@ -11,10 +11,11 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cn.edu.ysu.ciallo.di.previewModule
 import cn.edu.ysu.ciallo.ysu.LoginUiState
-import cn.edu.ysu.ciallo.ysu.YsuEhallApiFactory
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.KoinApplicationPreview
+import org.koin.compose.koinInject
 
 class LoginPage : Screen {
     @Composable
@@ -32,10 +33,8 @@ class LoginPage : Screen {
 }
 
 @Composable
-fun LoginPageContent(onLoginSuccess: () -> Unit) {
-    val coroutineScope = rememberCoroutineScope()
-    val api = YsuEhallApiFactory.getInstance()
-    val loginState by api.loginState.collectAsState()
+fun LoginPageContent(onLoginSuccess: () -> Unit, viewModel: LoginViewModel = koinInject()) {
+    val loginState by viewModel.loginState.collectAsState()
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -63,9 +62,7 @@ fun LoginPageContent(onLoginSuccess: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                coroutineScope.launch {
-                    api.login(username, password)
-                }
+                viewModel.login(username, password)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -99,7 +96,7 @@ fun LoginPageContent(onLoginSuccess: () -> Unit) {
 @Composable
 @Preview
 fun PreviewLoginPage() {
-    MaterialTheme {
+    KoinApplicationPreview(application = { modules(previewModule) }) {
         LoginPageContent(onLoginSuccess = {})
     }
 }

@@ -1,11 +1,8 @@
 package cn.edu.ysu.ciallo.ysu
 
-import io.ktor.client.plugins.cookies.CookiesStorage
-import io.ktor.http.Cookie
-import io.ktor.http.CookieEncoding
-import io.ktor.http.Url
-import io.ktor.http.fullPath
-import io.ktor.util.date.GMTDate
+import io.ktor.client.plugins.cookies.*
+import io.ktor.http.*
+import io.ktor.util.date.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
@@ -35,7 +32,7 @@ data class CookiePersistModel(val cookies: List<Pair<SerializableUrl, Serializab
 class CustomCookieStorage : CookiesStorage {
     private val mutex = Mutex()
     private val cookieJar = mutableListOf<Pair<Url, Cookie>>()
-    private val persistFile = getCookiePersistPath() // 平台适配路径
+    private val persistFile by lazy { getCookiePersistPath() } // 平台适配路径
 
     init {
         loadFromDisk()
