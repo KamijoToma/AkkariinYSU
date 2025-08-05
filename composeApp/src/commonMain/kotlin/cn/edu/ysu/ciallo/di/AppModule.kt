@@ -22,8 +22,8 @@ val appModule = module {
     singleOf(::RemoteLoginRepository) { bind<LoginRepository>() }
 
     // ViewModels
-    factoryOf(::HomeViewModel)
-    factory { CardBalanceViewModel(get()) }
+    single { HomeViewModel(get()) }
+    single { CardBalanceViewModel(get()) }
     factoryOf(::LoginViewModel)
 }
 
@@ -36,7 +36,7 @@ val previewModule = module {
     singleOf(::FakeLoginRepository) { bind<LoginRepository>() }
 
     // ViewModels
-    factoryOf(::HomeViewModel)
-    factory { CardBalanceViewModel(get()) }
+    single { HomeViewModel(get()) }
+    single { CardBalanceViewModel(get()) }
     factoryOf(::LoginViewModel)
 }

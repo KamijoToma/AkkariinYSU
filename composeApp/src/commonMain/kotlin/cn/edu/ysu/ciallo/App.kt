@@ -1,7 +1,7 @@
 package cn.edu.ysu.ciallo
 
-import androidx.compose.runtime.Composable
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.navigator.Navigator
 import cn.edu.ysu.ciallo.di.appModule
 import cn.edu.ysu.ciallo.di.previewModule

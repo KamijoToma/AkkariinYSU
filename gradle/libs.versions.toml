@@ -25,9 +25,11 @@ kotlinx-serialization = "1.8.1"
 krypto = "4.0.0"
 slf4j = "2.0.9"
 voyager = "1.1.0-beta03"
+kotlinx-datetime = "0.6.0"
 
 [libraries]
 kodein-di = { module = "org.kodein.di:kodein-di", version.ref = "kodeinDi" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation", version.ref = "koinComposeViewmodelNavigation" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCompose" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinComposeViewmodel" }

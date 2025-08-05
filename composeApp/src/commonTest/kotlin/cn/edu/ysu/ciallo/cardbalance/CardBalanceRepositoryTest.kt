@@ -2,8 +2,8 @@ package cn.edu.ysu.ciallo.cardbalance
 
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class CardBalanceRepositoryTest {
     @Test

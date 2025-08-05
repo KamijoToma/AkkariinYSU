@@ -74,6 +74,7 @@ kotlin {
             implementation(libs.voyager.tabNavigator)
             implementation(libs.voyager.koin)
             implementation(libs.voyager.lifecycle.kmp)
+            implementation(libs.kotlinx.datetime)
 
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)

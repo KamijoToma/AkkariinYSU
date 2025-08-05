@@ -3,6 +3,8 @@ package cn.edu.ysu.ciallo.home
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,8 +25,6 @@ import cn.edu.ysu.ciallo.di.previewModule
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplicationPreview
 import org.koin.compose.koinInject
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 
 class HomePageTab : Tab {
     @Composable
@@ -54,7 +54,7 @@ fun HomePageContent(
     homeViewModel: HomeViewModel = koinInject(),
     cardBalanceViewModel: CardBalanceViewModel = koinInject()
 ) {
-    // Load data when the composable is first launched
+    // Load data when the composable is first launched, using cached data if available
     LaunchedEffect(Unit) {
         homeViewModel.loadData()
         cardBalanceViewModel.loadCardBalance()
@@ -65,7 +65,18 @@ fun HomePageContent(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("主页") }
+                title = { Text("主页") },
+                actions = {
+                    IconButton(onClick = {
+                        homeViewModel.refreshData() // 刷新个人信息
+                        cardBalanceViewModel.refreshCardBalance() // 刷新校园卡余额
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh"
+                        )
+                    }
+                }
             )
         },
         modifier = modifier.fillMaxSize()
@@ -112,7 +123,7 @@ fun HomePageContent(
             )
             CardBalanceCard(
                 cardBalanceState = cardBalanceViewModel.uiState.value,
-                onRefresh = { cardBalanceViewModel.loadCardBalance() },
+                onRefresh = { cardBalanceViewModel.refreshCardBalance() },
                 onDetails = { /* TODO: 跳转到卡详情 */ },
             )
             NetworkCard(

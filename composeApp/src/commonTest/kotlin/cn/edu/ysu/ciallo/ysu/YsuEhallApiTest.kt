@@ -1,9 +1,10 @@
 package cn.edu.ysu.ciallo.ysu
 
 import kotlinx.coroutines.runBlocking
-import kotlin.test.*
 import kotlinx.coroutines.test.runTest
 import org.slf4j.LoggerFactory
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class YsuEhallApiTest {
     val api = runBlocking {
