@@ -67,6 +67,17 @@ kotlin {
             implementation(libs.slf4j.api)
             implementation(libs.slf4j.simple)
             implementation(libs.ktor.client.logging)
+            implementation(libs.voyager.navigator)
+            implementation(libs.voyager.screenModel)
+            implementation(libs.voyager.bottomSheetNavigator)
+            implementation(libs.voyager.transitions)
+            implementation(libs.voyager.tabNavigator)
+            implementation(libs.voyager.koin)
+            implementation(libs.voyager.lifecycle.kmp)
+
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.compose.viewmodel.navigation)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

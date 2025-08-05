@@ -12,6 +12,10 @@ androidx-testExt = "1.2.1"
 composeHotReload = "1.0.0-beta04"
 composeMultiplatform = "1.8.2"
 junit = "4.13.2"
+kodeinDi = "7.26.1"
+koinComposeViewmodel = "4.1.0"
+koinCompose = "4.1.0"
+koinComposeViewmodelNavigation = "4.1.0"
 kotlin = "2.2.0"
 kotlinx-coroutines = "1.10.2"
 okhttp = "5.1.0"
@@ -20,8 +24,13 @@ ksoup = "0.2.5"
 kotlinx-serialization = "1.8.1"
 krypto = "4.0.0"
 slf4j = "2.0.9"
+voyager = "1.1.0-beta03"
 
 [libraries]
+kodein-di = { module = "org.kodein.di:kodein-di", version.ref = "kodeinDi" }
+koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation", version.ref = "koinComposeViewmodelNavigation" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCompose" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinComposeViewmodel" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
@@ -39,6 +48,16 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 krypto = { module = "com.soywiz.korlibs.krypto:krypto", version.ref = "krypto" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
+voyager-screenModel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
+voyager-bottomSheetNavigator = { module = "cafe.adriel.voyager:voyager-bottom-sheet-navigator", version.ref = "voyager" }
+voyager-tabNavigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
+voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
+voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager" }
+voyager-hilt = { module = "cafe.adriel.voyager:voyager-hilt", version.ref = "voyager" }
+voyager-kodein = { module = "cafe.adriel.voyager:voyager-kodein", version.ref = "voyager" }
+voyager-rxjava = { module = "cafe.adriel.voyager:voyager-rxjava", version.ref = "voyager" }
+voyager-lifecycle-kmp = { module = "cafe.adriel.voyager:voyager-lifecycle-kmp", version.ref = "voyager" }
 
 
 [plugins]

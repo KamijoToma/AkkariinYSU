@@ -14,10 +14,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+object ClubRecommendPage : Tab {
+    @Composable
+    override fun Content() {
+        ClubRecommendPageContent()
+    }
+
+    override val options: TabOptions
+        @Composable
+        get() = TabOptions(
+            title = "社团推荐",
+            icon = null,
+            index = 1u
+        )
+}
+
 @Composable
-fun ClubRecommendPage(modifier: Modifier = Modifier) {
+fun ClubRecommendPageContent(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxSize().background(Color.White)) {
         // 顶部返回与标题
         Row(
@@ -39,15 +56,9 @@ fun ClubRecommendPage(modifier: Modifier = Modifier) {
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("西电开源社区", color = Color.White, fontWeight = FontWeight.Bold)
-                            Text("技术豪杰与隐藏大佬无处不在", color = Color.White, fontSize = 12.sp)
-                        }
-                        Spacer(Modifier.size(8.dp))
-                        Text("技术", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("社团 $idx", color = Color.White, fontSize = 16.sp)
                     }
                 }
             }
@@ -58,6 +69,5 @@ fun ClubRecommendPage(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 fun PreviewClubRecommendPage() {
-    ClubRecommendPage()
+    ClubRecommendPageContent()
 }
-

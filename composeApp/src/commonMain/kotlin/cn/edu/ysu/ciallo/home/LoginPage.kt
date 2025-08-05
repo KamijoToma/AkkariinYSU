@@ -1,17 +1,38 @@
 package cn.edu.ysu.ciallo.home
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.edu.ysu.ciallo.ysu.LoginUiState
 import cn.edu.ysu.ciallo.ysu.YsuEhallApiFactory
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.ui.tooling.preview.Preview
+
+class LoginPage : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        Column {
+            // 添加返回按钮
+            IconButton(onClick = { navigator.pop() }) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+            }
+            // 其余内容保持不变
+            LoginPageContent(onLoginSuccess = { navigator.pop() })
+        }
+    }
+}
 
 @Composable
-fun LoginPage(onLoginSuccess: () -> Unit) {
+fun LoginPageContent(onLoginSuccess: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
     val api = YsuEhallApiFactory.getInstance()
     val loginState by api.loginState.collectAsState()
@@ -72,5 +93,13 @@ fun LoginPage(onLoginSuccess: () -> Unit) {
                 Text("登录成功！")
             }
         }
+    }
+}
+
+@Composable
+@Preview
+fun PreviewLoginPage() {
+    MaterialTheme {
+        LoginPageContent(onLoginSuccess = {})
     }
 }
