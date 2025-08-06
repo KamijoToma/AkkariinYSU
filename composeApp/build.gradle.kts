@@ -11,6 +11,9 @@ plugins {
     alias(libs.plugins.kotlinxSerialization)
 }
 
+val majorVersion = 1
+val minorVersion = "0.1"
+
 kotlin {
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -100,8 +103,8 @@ android {
         applicationId = "cn.edu.ysu.ciallo"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = majorVersion
+        versionName = minorVersion
     }
     packaging {
         resources {
@@ -130,7 +133,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "cn.edu.ysu.ciallo"
-            packageVersion = "1.0.0"
+            packageVersion = "$majorVersion.$minorVersion"
         }
     }
 }
