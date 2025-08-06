@@ -22,6 +22,7 @@ import cn.edu.ysu.ciallo.components.LibraryCard
 import cn.edu.ysu.ciallo.components.NetworkCard
 import cn.edu.ysu.ciallo.components.ScheduleCard
 import cn.edu.ysu.ciallo.di.previewModule
+import cn.edu.ysu.ciallo.studentinfo.StudentInfoPage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplicationPreview
 import org.koin.compose.koinInject
@@ -33,7 +34,10 @@ class HomePageTab : Tab {
         HomePageContent(
             onNavigateToLogin = {
                 navigator.parent?.push(LoginPage()) // 跳转到登录页面
-            }
+            },
+            onNavigateToProfile = {
+                navigator.parent?.push(StudentInfoPage()) // 跳转到个人信息页面
+            },
         )
     }
 
@@ -51,6 +55,7 @@ class HomePageTab : Tab {
 fun HomePageContent(
     modifier: Modifier = Modifier,
     onNavigateToLogin: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     homeViewModel: HomeViewModel = koinInject(),
     cardBalanceViewModel: CardBalanceViewModel = koinInject()
 ) {
@@ -104,7 +109,7 @@ fun HomePageContent(
                 )
             } else {
                 AssistChip(
-                    onClick = { /* TODO: 可以考虑跳转到个人信息页 */ },
+                    onClick = onNavigateToProfile,
                     label = { Text("已登录：${homeData.studentType}") },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
@@ -138,6 +143,6 @@ fun HomePageContent(
 @Composable
 fun PreviewHomePage() {
     KoinApplicationPreview(application = { modules(previewModule) }) {
-        HomePageContent(onNavigateToLogin = {})
+        HomePageContent(onNavigateToLogin = {}, onNavigateToProfile = {})
     }
 }

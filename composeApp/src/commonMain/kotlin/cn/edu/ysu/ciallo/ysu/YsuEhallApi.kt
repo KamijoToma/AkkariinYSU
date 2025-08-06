@@ -13,6 +13,9 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 
 /**
@@ -72,11 +75,15 @@ class YsuEhallApi {
         private const val CHECK_CAPTCHA_URL = "https://cer.ysu.edu.cn/authserver/checkNeedCaptcha.htl"
         private const val CAPTCHA_URL = "https://cer.ysu.edu.cn/authserver/getCaptcha.htl"
         private const val BASE_URL = "https://ehall.ysu.edu.cn"
+        private const val STUDENT_BASE_INFO_URL = "$BASE_URL/xsfw/sys/jbxxapp/modules/infoStudent/getStuBaseInfo.do"
+        private const val INDEX_DO_URL = "$BASE_URL/xsfw/sys/jbxxapp/*default/index.do"
+        private const val APP_ID_JBXX = "4585275700341858"
+        private const val APP_NAME_JBXX = "jbxxapp"
     }
 
     private val client = HttpClient {
         install(ContentNegotiation) {
-            json()
+            json(Json { ignoreUnknownKeys = true })
         }
         install(HttpCookies) {
             storage = cookieStorage
@@ -107,6 +114,38 @@ class YsuEhallApi {
     private var _eventId: String = "submit"
     private var captcha: String? = null
 
+    private suspend fun getCurrentUserStudentId(): String? {
+        return try {
+            val response = client.get(INDEX_DO_URL)
+            val soup = com.fleeksoft.ksoup.Ksoup.parse(response.bodyAsText())
+
+            val scriptTag = soup.select("script").firstOrNull { it.html().contains("var pageMeta = {") }
+
+            if (scriptTag != null) {
+                val scriptContent = scriptTag.html()
+                val match = Regex("var pageMeta = (\\{.*?\\});").find(scriptContent)
+                if (match != null) {
+                    val pageMetaJsonStr = match.groupValues[1]
+                    val pageMeta = kotlinx.serialization.json.Json.parseToJsonElement(pageMetaJsonStr).jsonObject
+                    val studentId = pageMeta["params"]?.jsonObject?.get("USERID")?.jsonPrimitive?.content
+                    if (studentId != null) {
+                        println("成功从页面获取当前用户学号: $studentId")
+                        return studentId
+                    } else {
+                        println("在 pageMeta 中未找到 USERID。")
+                    }
+                } else {
+                    println("未能从 script 标签内容中匹配到 pageMeta JSON。")
+                }
+            } else {
+                println("未找到包含 'var pageMeta =' 的 script 标签。")
+            }
+            null
+        } catch (e: Exception) {
+            println("访问 $INDEX_DO_URL 页面失败或解析内容失败: ${e.message}")
+            null
+        }
+    }
 
     private suspend fun fetchLoginPage(): Boolean {
         return try {
@@ -313,4 +352,50 @@ class YsuEhallApi {
             false
         }
     }
+
+    suspend fun getStudentBaseInfo(studentId: String? = null): StudentBaseInfo? {
+        val actualStudentId = studentId ?: getCurrentUserStudentId()
+        if (actualStudentId == null) {
+            println("未能获取当前用户的学号，无法查询学生基本信息。")
+            return null
+        }
+
+        // 需要先访问一次获取 appConfig cookies
+        try {
+            client.post("$BASE_URL/xsfw/sys/swpubapp/indexmenu/getAppConfig.do") {
+                url {
+                    parameters.append("appId", APP_ID_JBXX)
+                    parameters.append("appName", APP_NAME_JBXX)
+                }
+            }
+        } catch (e: Exception) {
+            println("获取学生基本信息前获取 appConfig 失败: ${e.message}")
+            return null
+        }
+
+        return try {
+            val response = client.post(STUDENT_BASE_INFO_URL) {
+                setBody(FormDataContent(Parameters.build {
+                    append("requestParamStr", "{\"XSBH\":\"$actualStudentId\"}")
+                }))
+                contentType(ContentType.Application.FormUrlEncoded)
+            }
+            if (response.status.isSuccess()) {
+                response.body<StudentBaseInfoResponse>().data
+            } else {
+                println("获取学生基本信息失败: ${response.status}")
+                null
+            }
+        } catch (e: Exception) {
+            println("获取学生基本信息异常: ${e.message}")
+            null
+        }
+    }
+
+    @kotlinx.serialization.Serializable
+    data class StudentBaseInfoResponse(
+        val returnCode: String,
+        val description: String,
+        val data: StudentBaseInfo? = null
+    )
 }

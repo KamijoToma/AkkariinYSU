@@ -5,6 +5,10 @@ import cn.edu.ysu.ciallo.cardbalance.CardBalanceViewModel
 import cn.edu.ysu.ciallo.cardbalance.MockCardBalanceRepository
 import cn.edu.ysu.ciallo.cardbalance.RemoteCardBalanceRepository
 import cn.edu.ysu.ciallo.home.*
+import cn.edu.ysu.ciallo.studentinfo.MockStudentInfoRepository
+import cn.edu.ysu.ciallo.studentinfo.RemoteStudentInfoRepository
+import cn.edu.ysu.ciallo.studentinfo.StudentInfoRepository
+import cn.edu.ysu.ciallo.studentinfo.StudentInfoViewModel
 import cn.edu.ysu.ciallo.ysu.YsuEhallApi
 import cn.edu.ysu.ciallo.ysu.YsuEhallApiFactory
 import org.koin.core.module.dsl.bind
@@ -20,11 +24,13 @@ val appModule = module {
     singleOf(::RemoteHomeRepository) { bind<HomeRepository>() }
     singleOf(::RemoteCardBalanceRepository) { bind<CardBalanceRepository>() }
     singleOf(::RemoteLoginRepository) { bind<LoginRepository>() }
+    singleOf(::RemoteStudentInfoRepository) { bind<StudentInfoRepository>() }
 
     // ViewModels
     single { HomeViewModel(get()) }
     single { CardBalanceViewModel(get()) }
     factoryOf(::LoginViewModel)
+    single { StudentInfoViewModel(get()) }
 }
 
 val previewModule = module {
@@ -34,9 +40,11 @@ val previewModule = module {
     singleOf(::FakeHomeRepository) { bind<HomeRepository>() }
     singleOf(::MockCardBalanceRepository) { bind<CardBalanceRepository>() }
     singleOf(::FakeLoginRepository) { bind<LoginRepository>() }
+    singleOf(::MockStudentInfoRepository) { bind<StudentInfoRepository>() }
 
     // ViewModels
     single { HomeViewModel(get()) }
     single { CardBalanceViewModel(get()) }
     factoryOf(::LoginViewModel)
+    single { StudentInfoViewModel(get()) }
 }
