@@ -32,7 +32,7 @@ class StudentInfoPage : Screen {
         val navigator = LocalNavigator.currentOrThrow
         Scaffold(
             topBar = {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     title = { Text("个人信息") },
                     navigationIcon = {
                         IconButton(onClick = { navigator.pop() }) {
@@ -57,11 +57,20 @@ fun InfoItem(label: String, value: String?) {
     if (value != null && value.isNotBlank()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "$label:", style = MaterialTheme.typography.bodyLarge)
-            Spacer(Modifier.width(8.dp))
-            Text(text = value, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = "$label:",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(0.4f)
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(0.6f)
+            )
         }
     }
 }
@@ -72,54 +81,144 @@ fun StudentInfoPageContent(
     modifier: Modifier,
     uiState: StudentInfoUiState
 ) {
-
     Surface(
-        modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
         Box(
             contentAlignment = Alignment.Center
         ) {
             when (uiState) {
                 is StudentInfoUiState.Loading -> {
-                    CircularProgressIndicator()
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(text = "正在加载个人信息...", style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
 
                 is StudentInfoUiState.Success -> {
                     val studentInfo = uiState.studentInfo
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        item { InfoItem("姓名", studentInfo.name) }
-                        item { InfoItem("学号", studentInfo.studentId) }
-                        item { InfoItem("性别", studentInfo.gender) }
-                        item { InfoItem("出生日期", studentInfo.birthday) }
-                        item { InfoItem("民族", studentInfo.ethnicGroup) }
-                        item { InfoItem("政治面貌", studentInfo.politicalStatus) }
-                        item { InfoItem("身份证件号", studentInfo.idCardNumber) }
-                        item { InfoItem("联系电话", studentInfo.contactPhone) }
-                        item { InfoItem("电子邮箱", studentInfo.email) }
-                        item { InfoItem("所在单位（学院）", studentInfo.department) }
-                        item { InfoItem("专业", studentInfo.major) }
-                        item { InfoItem("班级", studentInfo.className) }
-                        item { InfoItem("入学年月", studentInfo.enrollmentYearMonth) }
-                        item { InfoItem("学生类型", studentInfo.studentType) }
-                        item { InfoItem("学习形式", studentInfo.studyForm) }
-                        item { InfoItem("校区", studentInfo.campus) }
-                        item { InfoItem("家庭地址", studentInfo.homeAddress) }
-                        item { InfoItem("身高", studentInfo.height) }
-                        item { InfoItem("体重", studentInfo.weight?.toString()) }
-                        item { InfoItem("健康状况", studentInfo.healthStatus) }
-                        item { InfoItem("学生状态", studentInfo.studentStatusDisplay) }
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text(
+                                        text = "基本信息",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                    InfoItem("姓名", studentInfo.name)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("学号", studentInfo.studentId)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("性别", studentInfo.gender)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("出生日期", studentInfo.birthday)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("民族", studentInfo.ethnicGroup)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("政治面貌", studentInfo.politicalStatus)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("身份证件号", studentInfo.idCardNumber)
+                                }
+                            }
+                        }
+
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text(
+                                        text = "联系方式",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                    InfoItem("联系电话", studentInfo.contactPhone)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("电子邮箱", studentInfo.email)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("家庭地址", studentInfo.homeAddress)
+                                }
+                            }
+                        }
+
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text(
+                                        text = "学籍信息",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                    InfoItem("所在单位（学院）", studentInfo.department)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("专业", studentInfo.major)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("班级", studentInfo.className)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("入学年月", studentInfo.enrollmentYearMonth)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("学生类型", studentInfo.studentType)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("学习形式", studentInfo.studyForm)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("校区", studentInfo.campus)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("学生状态", studentInfo.studentStatusDisplay)
+                                }
+                            }
+                        }
+
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text(
+                                        text = "健康信息",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                    InfoItem("身高", studentInfo.height)
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("体重", studentInfo.weight?.toString())
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                    InfoItem("健康状况", studentInfo.healthStatus)
+                                }
+                            }
+                        }
                         // 学生照片字段 XSZP 暂时不展示，因为需要额外的图片加载逻辑
                     }
                 }
 
                 is StudentInfoUiState.Error -> {
-                    Text(
-                        text = uiState.message,
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = uiState.message,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        // 可以考虑添加一个刷新按钮
+                    }
                 }
             }
         }
