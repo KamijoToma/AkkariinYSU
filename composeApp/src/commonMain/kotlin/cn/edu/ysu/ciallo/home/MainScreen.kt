@@ -15,7 +15,7 @@ import cafe.adriel.voyager.navigator.tab.TabNavigator
 class MainScreen : Screen {
     @Composable
     override fun Content() {
-        TabNavigator(HomePageTab()) { tabNavigator ->
+        TabNavigator(HomePageTab) { tabNavigator ->
             Scaffold(
                 content = {
                     Box(modifier = Modifier.padding(it)) {
@@ -25,8 +25,8 @@ class MainScreen : Screen {
                 bottomBar = {
                     NavigationBar {
                         NavigationBarItem(
-                            selected = tabNavigator.current == HomePageTab(),
-                            onClick = { tabNavigator.current = HomePageTab() },
+                            selected = tabNavigator.current == HomePageTab,
+                            onClick = { tabNavigator.current = HomePageTab },
                             icon = { Icon(Icons.Default.Home, contentDescription = "主页") },
                             label = { Text("主页") }
                         )
