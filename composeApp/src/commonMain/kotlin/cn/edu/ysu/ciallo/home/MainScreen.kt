@@ -18,7 +18,7 @@ class MainScreen : Screen {
         TabNavigator(HomePageTab) { tabNavigator ->
             Scaffold(
                 content = {
-                    Box(modifier = Modifier.padding(it)) {
+                    Box(modifier = Modifier.padding(bottom = it.calculateBottomPadding())) {
                         CurrentTab()
                     }
                 },
