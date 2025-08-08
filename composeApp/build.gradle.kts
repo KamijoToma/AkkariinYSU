@@ -12,7 +12,7 @@ plugins {
 }
 
 val majorVersion = 1
-val minorVersion = "0.1"
+val minorVersion = "0.2"
 
 kotlin {
     androidTarget {
