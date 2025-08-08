@@ -66,13 +66,13 @@ class RemoteHomeRepository : HomeRepository {
         // 例如：api.getHomeData()，返回一个 HomeData 对象
         // 由于没有具体的API实现，这里返回假数据
         var logged = true
-        var studentType = "<UNK>";
-        var userName = "阿卡林";
-        val user_info = api.getLoginUser()
-        if (user_info != null && user_info.data != null) {
+        var studentType = "<UNK>"
+        var userName = "阿卡林"
+        val studentBaseInfo = api.getLoginUser()
+        if (studentBaseInfo != null) {
             logged = true
-            studentType = user_info.data.categoryName ?: "<UNK>"
-            userName = user_info.data.userName ?: "Akari"
+            studentType = studentBaseInfo.studentType ?: "<UNK>"
+            userName = studentBaseInfo.name ?: "Akari"
         } else {
             logged = false
             studentType = "<未登录>"
@@ -94,4 +94,3 @@ class RemoteHomeRepository : HomeRepository {
         )
     }
 }
-
