@@ -17,12 +17,10 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import cn.edu.ysu.ciallo.cardbalance.CardBalanceViewModel
-import cn.edu.ysu.ciallo.components.CardBalanceCard
-import cn.edu.ysu.ciallo.components.GpaCard
-import cn.edu.ysu.ciallo.components.LibraryCard
-import cn.edu.ysu.ciallo.components.NetworkCard
-import cn.edu.ysu.ciallo.components.ScheduleCard
+import cn.edu.ysu.ciallo.components.*
 import cn.edu.ysu.ciallo.di.previewModule
+import cn.edu.ysu.ciallo.gpa.GpaDetail
+import cn.edu.ysu.ciallo.gpa.GpaDetailPage
 import cn.edu.ysu.ciallo.gpa.GpaViewModel
 import cn.edu.ysu.ciallo.studentinfo.StudentInfoPage
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -40,6 +38,9 @@ object HomePageTab : Tab {
             onNavigateToProfile = {
                 navigator.parent?.push(StudentInfoPage()) // 跳转到个人信息页面
             },
+            onNavigateToGpa = {
+                navigator.parent?.push(GpaDetailPage(it)) // 跳转到绩点详情页面
+            }
         )
     }
 
@@ -58,6 +59,7 @@ fun HomePageContent(
     modifier: Modifier = Modifier,
     onNavigateToLogin: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToGpa: (GpaDetail) -> Unit,
     homeViewModel: HomeViewModel = koinInject(),
     cardBalanceViewModel: CardBalanceViewModel = koinInject(),
     gpaViewModel: GpaViewModel = koinInject()
@@ -66,7 +68,6 @@ fun HomePageContent(
     LaunchedEffect(Unit) {
         homeViewModel.loadData()
         cardBalanceViewModel.loadCardBalance()
-        gpaViewModel.loadGpaInfo()
     }
 
     val homeData = homeViewModel.homeData.value
@@ -138,7 +139,8 @@ fun HomePageContent(
             )
             GpaCard(
                 gpaState = gpaViewModel.uiState.value,
-                onRefresh = { gpaViewModel.loadGpaInfo() }
+                onRefresh = { gpaViewModel.loadGpaInfo() },
+                onNavigateToDetail = onNavigateToGpa
             )
             NetworkCard(
                 networkInfo = "data.networkInfo"
@@ -152,6 +154,6 @@ fun HomePageContent(
 @Composable
 fun PreviewHomePage() {
     KoinApplicationPreview(application = { modules(previewModule) }) {
-        HomePageContent(onNavigateToLogin = {}, onNavigateToProfile = {})
+        HomePageContent(onNavigateToLogin = {}, onNavigateToProfile = {}, onNavigateToGpa = {})
     }
 }

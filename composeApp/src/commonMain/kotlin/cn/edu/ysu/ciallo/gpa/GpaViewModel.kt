@@ -1,22 +1,20 @@
 package cn.edu.ysu.ciallo.gpa
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class GpaViewModel(
     private val gpaRepository: GpaRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<GpaUiState>(GpaUiState.Idle)
-    val uiState: StateFlow<GpaUiState> = _uiState.asStateFlow()
+    private val _uiState = mutableStateOf<GpaUiState>(GpaUiState.Idle)
+    val uiState: State<GpaUiState> get() = _uiState
 
     fun loadGpaInfo() {
         viewModelScope.launch {
-            _uiState.value = GpaUiState.Loading
             _uiState.value = gpaRepository.getGpaInfo()
         }
     }

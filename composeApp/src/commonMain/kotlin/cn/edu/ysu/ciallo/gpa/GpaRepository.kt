@@ -1,9 +1,6 @@
 package cn.edu.ysu.ciallo.gpa
 
 import cn.edu.ysu.ciallo.ysu.YsuEhallApi
-import cn.edu.ysu.ciallo.ysu.YsuEhallApiFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 interface GpaRepository {
     suspend fun getGpaInfo(): GpaUiState
@@ -12,11 +9,12 @@ interface GpaRepository {
 class RemoteGpaRepository(
     private val api: YsuEhallApi
 ) : GpaRepository {
-    override suspend fun getGpaInfo(): GpaUiState = withContext(Dispatchers.IO) {
-        try {
+    override suspend fun getGpaInfo(): GpaUiState{
+        return try {
             // 进行 GPA 查询
             val response = api.getGpaInfo()
             if (response != null && response.code == "0" && response.datas?.gpaQueryResult?.rows?.isNotEmpty() == true) {
+                println("成功获取绩点信息: ${response.datas.gpaQueryResult.rows.first()}")
                 GpaUiState.Success(response.datas.gpaQueryResult.rows.first())
             } else {
                 GpaUiState.Error(response?.msg ?: "获取绩点信息失败")
@@ -50,3 +48,5 @@ class MockGpaRepository : GpaRepository {
         )
     }
 }
+
+
