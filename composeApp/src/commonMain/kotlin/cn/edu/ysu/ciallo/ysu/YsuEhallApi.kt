@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import cn.edu.ysu.ciallo.gpa.GpaResponse
 
 
 /**
@@ -79,6 +80,16 @@ class YsuEhallApi {
         private const val INDEX_DO_URL = "$BASE_URL/xsfw/sys/jbxxapp/*default/index.do"
         private const val APP_ID_JBXX = "4585275700341858"
         private const val APP_NAME_JBXX = "jbxxapp"
+
+        // 教务系统相关URL
+        private const val JWXT_BASE_URL = "https://jwxt.ysu.edu.cn"
+        private const val GPA_QUERY_URL = "$JWXT_BASE_URL/jwapp/sys/cjcx/modules/cjcx/cxzxfaxfjd.do"
+        private const val GPA_REFERER_URL = "$JWXT_BASE_URL/jwapp/sys/cjcx/*default/index.do?EMAP_LANG=zh"
+
+        // 绩点查询相关App配置
+        private const val APP_NAME_GPA = "cjcx" // 成绩查询应用名称
+        private const val APP_ID_GPA = "4768574631264620" // 成绩查询应用ID，可能需要动态获取
+        private const val GPA_GET_APP_CONFIG_URL = "$JWXT_BASE_URL/jwapp/sys/funauthapp/api/getAppConfig/$APP_NAME_GPA-$APP_ID_GPA.do"
     }
 
     private val client = HttpClient {
@@ -355,6 +366,68 @@ class YsuEhallApi {
         } catch (e: Exception) {
             println("检查登录状态失败: ${e.message}")
             false
+        }
+    }
+
+    private suspend fun _preGpaQuery(): Boolean {
+        return try {
+            client.get(GPA_REFERER_URL)
+            true
+        } catch (e: Exception) {
+            println("访问绩点查询 Referer URL 失败: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun getGpaInfo(studentId: String? = null): GpaResponse? {
+        val actualStudentId = studentId ?: getCurrentUserStudentId()
+        if (actualStudentId == null) {
+            println("未能获取当前用户的学号，无法查询绩点信息。")
+            return null
+        }
+
+        // 1. 访问绩点查询应用配置页面 (根据用户反馈，不独立为函数，不考虑返回值)
+        try {
+            println("正在访问绩点查询应用配置页面: $GPA_GET_APP_CONFIG_URL")
+            client.get(GPA_GET_APP_CONFIG_URL)
+        } catch (e: Exception) {
+            println("访问绩点查询应用配置页面失败: ${e.message}")
+            // 即使失败也继续，因为用户要求不考虑返回值
+        }
+
+        // 2. 访问 Referer URL 以确保设置必要的 cookies 和 Referer 头
+        if (!_preGpaQuery()) {
+            return null
+        }
+
+        val data = mapOf(
+            "XH1" to actualStudentId,
+            "XH2" to actualStudentId,
+            "XH3" to actualStudentId,
+            "XH4" to actualStudentId,
+            "XH5" to actualStudentId,
+            "XH6" to actualStudentId
+        )
+
+        println("正在查询学号 $actualStudentId 的学分绩点信息...")
+        return try {
+            val response = client.post(GPA_QUERY_URL) {
+                setBody(FormDataContent(Parameters.build {
+                    data.forEach { (key, value) ->
+                        append(key, value)
+                    }
+                }))
+                contentType(ContentType.Application.FormUrlEncoded)
+            }
+            if (response.status.isSuccess()) {
+                response.body<GpaResponse>()
+            } else {
+                println("获取学分绩点信息失败: ${response.status}")
+                null
+            }
+        } catch (e: Exception) {
+            println("获取学分绩点信息异常: ${e.message}")
+            null
         }
     }
 
