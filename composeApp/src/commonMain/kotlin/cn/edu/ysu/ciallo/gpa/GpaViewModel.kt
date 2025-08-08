@@ -15,6 +15,7 @@ class GpaViewModel(
 
     fun loadGpaInfo() {
         viewModelScope.launch {
+            _uiState.value = GpaUiState.Loading
             _uiState.value = gpaRepository.getGpaInfo()
         }
     }

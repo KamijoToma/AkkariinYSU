@@ -25,7 +25,7 @@ fun GpaCard(
     modifier: Modifier = Modifier,
     onNavigateToDetail: (GpaDetail) -> Unit,
 ) {
-    var isBlurred by remember { mutableStateOf(false) } // 用于控制是否模糊显示绩点
+    var isBlurred by remember { mutableStateOf(true) } // 用于控制是否模糊显示绩点
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = { /* No action on click, as per user's request */ }
