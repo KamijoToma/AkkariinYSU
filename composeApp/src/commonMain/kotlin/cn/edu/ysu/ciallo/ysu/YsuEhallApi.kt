@@ -174,7 +174,7 @@ class YsuEhallApi {
         }
     }
 
-    suspend fun login(username: String, password: String): LoginResult {
+    suspend fun login(username: String, password: String, rememberMe: Boolean = false): LoginResult {
         _loginState.value = LoginUiState.Loading
         if (!fetchLoginPage()) {
             _loginState.value = LoginUiState.Failure("无法获取登录页面信息")
@@ -185,7 +185,7 @@ class YsuEhallApi {
         // val needsCaptcha = client.post(CHECK_CAPTCHA_URL) { ... }
 
         val encPwd = PasswordEncryptor.encryptPassword(password, salt!!)
-        val data = mapOf(
+        val data = mutableMapOf(
             "username" to username,
             "password" to encPwd,
             "captcha" to (captcha ?: ""),
@@ -195,6 +195,11 @@ class YsuEhallApi {
             "cllt" to cllt,
             "dllt" to dllt,
         )
+
+        if (rememberMe) {
+            data["rememberMe"] = "true"
+            println("已启用7天免登录功能")
+        }
 
         try {
             val response = client.submitForm(

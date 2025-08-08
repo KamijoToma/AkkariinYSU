@@ -9,15 +9,15 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface LoginRepository {
     val loginState: StateFlow<LoginUiState>
-    suspend fun login(username: String, password: String): LoginResult
+    suspend fun login(username: String, password: String, rememberMe: Boolean): LoginResult
 }
 
 class RemoteLoginRepository(private val api: YsuEhallApi) : LoginRepository {
     override val loginState: StateFlow<LoginUiState>
         get() = api.loginState
 
-    override suspend fun login(username: String, password: String): LoginResult {
-        return api.login(username, password)
+    override suspend fun login(username: String, password: String, rememberMe: Boolean): LoginResult {
+        return api.login(username, password, rememberMe)
     }
 }
 
@@ -25,7 +25,7 @@ class FakeLoginRepository : LoginRepository {
     private val _loginState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     override val loginState: StateFlow<LoginUiState> = _loginState
 
-    override suspend fun login(username: String, password: String): LoginResult {
+    override suspend fun login(username: String, password: String, rememberMe: Boolean): LoginResult {
         _loginState.value = LoginUiState.Loading
         delay(1000) // Simulate network delay
         return if (username == "preview" && password == "preview") {

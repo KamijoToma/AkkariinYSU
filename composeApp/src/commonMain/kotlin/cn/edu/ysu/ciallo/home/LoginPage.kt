@@ -55,6 +55,7 @@ fun LoginPageContent(
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var rememberMe by remember { mutableStateOf(false) } // 新增 rememberMe 状态
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -92,10 +93,23 @@ fun LoginPageContent(
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation()
             )
+            Spacer(modifier = Modifier.height(16.dp)) // 新增间距
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = rememberMe,
+                    onCheckedChange = { rememberMe = it }
+                )
+                Text("7天免登录")
+            }
+
             Spacer(modifier = Modifier.height(32.dp)) // 输入框与按钮之间的间距
             Button(
                 onClick = {
-                    viewModel.login(username, password)
+                    viewModel.login(username, password, rememberMe) // 传递 rememberMe
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = loginState != LoginUiState.Loading

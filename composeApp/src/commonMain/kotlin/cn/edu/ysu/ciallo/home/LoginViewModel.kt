@@ -9,9 +9,9 @@ import kotlinx.coroutines.launch
 class LoginViewModel(private val repository: LoginRepository) : ViewModel() {
     val loginState: StateFlow<LoginUiState> = repository.loginState
 
-    fun login(username: String, password: String) {
+    fun login(username: String, password: String, rememberMe: Boolean) {
         viewModelScope.launch {
-            repository.login(username, password)
+            repository.login(username, password, rememberMe)
         }
     }
 }
