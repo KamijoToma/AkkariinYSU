@@ -22,6 +22,7 @@ import cn.edu.ysu.ciallo.di.previewModule
 import cn.edu.ysu.ciallo.gpa.GpaDetail
 import cn.edu.ysu.ciallo.gpa.GpaDetailPage
 import cn.edu.ysu.ciallo.gpa.GpaViewModel
+import cn.edu.ysu.ciallo.library.LibrarySeatViewModel
 import cn.edu.ysu.ciallo.studentinfo.StudentInfoPage
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplicationPreview
@@ -62,12 +63,14 @@ fun HomePageContent(
     onNavigateToGpa: (GpaDetail) -> Unit,
     homeViewModel: HomeViewModel = koinInject(),
     cardBalanceViewModel: CardBalanceViewModel = koinInject(),
-    gpaViewModel: GpaViewModel = koinInject()
+    gpaViewModel: GpaViewModel = koinInject(),
+    librarySeatViewModel: LibrarySeatViewModel = koinInject()
 ) {
     // Load data when the composable is first launched, using cached data if available
     LaunchedEffect(Unit) {
         homeViewModel.loadData()
         cardBalanceViewModel.loadCardBalance()
+        librarySeatViewModel.loadLibrarySeatOverview()
     }
 
     val homeData = homeViewModel.homeData.value
@@ -81,6 +84,7 @@ fun HomePageContent(
                         homeViewModel.refreshData() // 刷新个人信息
                         cardBalanceViewModel.refreshCardBalance() // 刷新校园卡余额
                         gpaViewModel.loadGpaInfo() // 刷新绩点信息
+                        librarySeatViewModel.refreshLibrarySeatOverview() // 刷新图书馆座位信息
                     }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
@@ -128,9 +132,8 @@ fun HomePageContent(
                 onMore = { /* TODO: 跳转日程 */ }
             )
             LibraryCard(
-                electricityInfo = "data.electricityInfo",
-                bookInfo = "data.bookInfo",
-                libraryStatus = emptyList(),
+                librarySeatState = librarySeatViewModel.uiState.value,
+                onRefresh = { librarySeatViewModel.refreshLibrarySeatOverview() }
             )
             CardBalanceCard(
                 cardBalanceState = cardBalanceViewModel.uiState.value,

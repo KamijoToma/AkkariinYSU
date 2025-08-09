@@ -9,6 +9,10 @@ import cn.edu.ysu.ciallo.gpa.GpaViewModel
 import cn.edu.ysu.ciallo.gpa.MockGpaRepository
 import cn.edu.ysu.ciallo.gpa.RemoteGpaRepository
 import cn.edu.ysu.ciallo.home.*
+import cn.edu.ysu.ciallo.library.LibrarySeatRepository
+import cn.edu.ysu.ciallo.library.LibrarySeatViewModel
+import cn.edu.ysu.ciallo.library.MockLibrarySeatRepository
+import cn.edu.ysu.ciallo.library.RemoteLibrarySeatRepository
 import cn.edu.ysu.ciallo.studentinfo.MockStudentInfoRepository
 import cn.edu.ysu.ciallo.studentinfo.RemoteStudentInfoRepository
 import cn.edu.ysu.ciallo.studentinfo.StudentInfoRepository
@@ -30,6 +34,7 @@ val appModule = module {
     singleOf(::RemoteLoginRepository) { bind<LoginRepository>() }
     singleOf(::RemoteStudentInfoRepository) { bind<StudentInfoRepository>() }
     singleOf(::RemoteGpaRepository) { bind<GpaRepository>() }
+    singleOf(::RemoteLibrarySeatRepository) { bind<LibrarySeatRepository>() }
 
     // ViewModels
     single { HomeViewModel(get()) }
@@ -37,6 +42,7 @@ val appModule = module {
     factoryOf(::LoginViewModel)
     single { StudentInfoViewModel(get()) }
     single { GpaViewModel(get()) }
+    single { LibrarySeatViewModel(get()) }
 }
 
 val previewModule = module {
@@ -48,6 +54,7 @@ val previewModule = module {
     singleOf(::FakeLoginRepository) { bind<LoginRepository>() }
     singleOf(::MockStudentInfoRepository) { bind<StudentInfoRepository>() }
     singleOf(::MockGpaRepository) { bind<GpaRepository>() }
+    singleOf(::MockLibrarySeatRepository) { bind<LibrarySeatRepository>() }
 
     // ViewModels
     single { HomeViewModel(get()) }
@@ -55,4 +62,5 @@ val previewModule = module {
     factoryOf(::LoginViewModel)
     single { StudentInfoViewModel(get()) }
     single { GpaViewModel(get()) }
+    single { LibrarySeatViewModel(get()) }
 }

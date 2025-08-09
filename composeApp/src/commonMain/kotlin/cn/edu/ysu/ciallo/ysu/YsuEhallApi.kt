@@ -1,6 +1,7 @@
 package cn.edu.ysu.ciallo.ysu
 
 import cn.edu.ysu.ciallo.gpa.GpaResponse
+import cn.edu.ysu.ciallo.library.LibrarySeatOverviewResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -90,6 +91,10 @@ class YsuEhallApi {
         private const val APP_NAME_GPA = "cjcx" // 成绩查询应用名称
         private const val APP_ID_GPA = "4768574631264620" // 成绩查询应用ID，可能需要动态获取
         private const val GPA_GET_APP_CONFIG_URL = "$JWXT_BASE_URL/jwapp/sys/funauthapp/api/getAppConfig/$APP_NAME_GPA-$APP_ID_GPA.do"
+
+        // 图书馆系统相关URL
+        private const val LIBRARY_BASE_URL = "http://seat.ysu.edu.cn"
+        private const val LIBRARY_SEAT_OVERVIEW_URL = "$LIBRARY_BASE_URL/ic-web/seatMenu"
     }
 
     private val client = HttpClient {
@@ -371,6 +376,29 @@ class YsuEhallApi {
             }
         } catch (e: Exception) {
             println("获取学生基本信息异常: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun getLibrarySeatOverview(): LibrarySeatOverviewResponse? {
+        return try {
+            val response = client.get(LIBRARY_SEAT_OVERVIEW_URL) {
+                header("Accept", "application/json, text/plain, */*")
+                header("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,zh-TW;q=0.5")
+                header("Cache-Control", "no-cache")
+                header("DNT", "1")
+                header("Pragma", "no-cache")
+                header("Proxy-Connection", "keep-alive")
+                header("lan", "1")
+            }
+            if (response.status.isSuccess()) {
+                response.body<LibrarySeatOverviewResponse>()
+            } else {
+                println("获取图书馆座位概览失败: ${response.status}")
+                null
+            }
+        } catch (e: Exception) {
+            println("获取图书馆座位概览异常: ${e.message}")
             null
         }
     }
